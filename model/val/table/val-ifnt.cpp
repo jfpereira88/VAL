@@ -11,6 +11,7 @@ namespace val {
 namespace ifnt {
 
     Ifnt::Ifnt()
+        :m_nItens(0)
     {
     }
 
@@ -23,6 +24,7 @@ namespace ifnt {
     Ifnt::addEntry(Entry& entry)
     {
         m_table.push_back(std::make_unique<Entry>(std::move(entry)));
+        m_nItens++;
     }
     
     bool 
@@ -34,6 +36,7 @@ namespace ifnt {
             if (*it->get() == entry)
             {
                 m_table.erase(it);
+                m_nItens--;
                 return true;
             }
             it++;

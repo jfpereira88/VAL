@@ -4,9 +4,7 @@
  */
 
 #include "val-forwarder.hpp"
-#include "NFD/core/logger.hpp"
-#include <ndn-cxx/data.hpp>
-#include <ndn-cxx/interest.hpp>
+
 
 
 namespace ns3 {
@@ -78,7 +76,10 @@ ValForwarder::onReceivedValPacket(const Face& face, const ndn::Block& valP)
 void
 ValForwarder::processReceivedInterest(const Face& face, const Block& valH, const Interest& interest)
 {
-
+  // add ifnt entry
+  ifnt::Entry entry(interest, face);
+  m_ifnt.addEntry(entry);
+  
 }
 
 void

@@ -206,6 +206,16 @@ private: // receive path
   void
   doReceivePacket(Transport::Packet&& packet) override;
 
+private: // pure virtual methods from LinkService that are not used but need to be define
+  void
+  doSendInterest(const Interest& interest) override;
+
+  void
+  doSendData(const Data& data) override;
+
+  void
+  doSendNack(const lp::Nack& nack) override;
+
   Options m_options;
   LpFragmenter m_fragmenter;
   LpReassembler m_reassembler;
@@ -233,6 +243,24 @@ inline const ValLinkService::Counters&
 ValLinkService::getCounters() const
 {
   return *this;
+}
+
+inline void
+ValLinkService::doSendInterest(const Interest& interest)
+{
+  return;
+}
+
+inline void
+ValLinkService::doSendData(const Data& data)
+{
+  return;
+}
+
+inline void
+ValLinkService::doSendNack(const lp::Nack& nack)
+{
+  return;
 }
 
 } // namespace face    

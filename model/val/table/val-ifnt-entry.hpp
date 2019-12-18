@@ -9,6 +9,12 @@
 #include <memory>
 #include <ndn-cxx/interest.hpp>
 
+namespace nfd {
+namespace face {
+    class Face;
+}
+}
+
 using ::ndn::Interest;
 
 namespace ns3 {
@@ -20,7 +26,7 @@ class Entry
 {
 public:
     explicit
-    Entry(const Interest& interest);
+    Entry(const Interest& interest, const nfd::face::Face& face);
 
     Entry(const Entry& entry);
 
@@ -37,10 +43,18 @@ public:
     {
         return m_da;
     }
+
+    const nfd::face::Face&
+    getFace() const
+    {
+        return m_face;
+    }
+    
 private:
     uint32_t m_nonce;
     uint32_t m_da;
-
+    // unmutable pointer to const variable
+    const nfd::face::Face& m_face;
 };
 
 bool

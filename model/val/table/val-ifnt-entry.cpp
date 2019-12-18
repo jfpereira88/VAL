@@ -10,9 +10,10 @@ namespace ndn {
 namespace val {
 namespace ifnt {
 
-    Entry::Entry(const Interest& interest)
+    Entry::Entry(const Interest& interest, const nfd::face::Face& face)
         : m_nonce(interest.getNonce())
         , m_da(0)
+        , m_face(face)
     {
     }
 
@@ -20,6 +21,7 @@ namespace ifnt {
     Entry::Entry(const Entry& entry)
         : m_nonce(entry.getNonce())
         , m_da(entry.getDA())
+        , m_face(entry.getFace())
     {
     }
 

@@ -5,6 +5,8 @@
 #include "val-dummy-link-service.hpp"
 #include "ns3/log.h"
 
+NS_LOG_COMPONENT_DEFINE("ndn.val.face.ValDummyLinkService");
+
 namespace ns3 {
 namespace ndn {
 namespace val {
@@ -20,16 +22,17 @@ ValDummyLinkService::~ValDummyLinkService()
 }
 
 void
-ValDummyLinkService::doSendDataToVal(const Data& data, std::vector<const uint32_t> *nonceList)
+ValDummyLinkService::doSendDataToVal(const Data& data, std::vector<const uint32_t> *nonceList, bool isProducer)
 {
-    // code here
-    return;
+    BOOST_ASSERT(m_valFwd != nullptr);
+    m_valFwd->reveiceData(data, nonceList, isProducer);
 }
 
 void
 ValDummyLinkService::doSendInterestToVal(const Interest& interest)
 {
-    return;
+    BOOST_ASSERT(m_valFwd != nullptr);
+    m_valFwd->reveiceInterest(interest);
 }
 
 
@@ -37,28 +40,28 @@ ValDummyLinkService::doSendInterestToVal(const Interest& interest)
 void
 ValDummyLinkService::doSendInterest(const Interest& interest)
 {
-    NS_LOG_ERROR("ValDummyLinkService::doSendInterest -> This should never happend!!!");
+    NS_LOG_ERROR("ValDummyLinkService::doSendInterest -> This should never happen!!!");
     BOOST_ASSERT(false);
 }
 
 void
 ValDummyLinkService::doSendData(const Data& data)
 {
-    NS_LOG_ERROR("ValDummyLinkService::doSendData -> This should never happend!!!");
+    NS_LOG_ERROR("ValDummyLinkService::doSendData -> This should never happen!!!");
     BOOST_ASSERT(false);
 }
 
 void
 ValDummyLinkService::doSendNack(const lp::Nack& nack)
 {
-    NS_LOG_ERROR("ValDummyLinkService::doSendNack -> This should never happend!!!");
+    NS_LOG_ERROR("ValDummyLinkService::doSendNack -> This should never happen!!!");
     BOOST_ASSERT(false);
 }
 
 void
 ValDummyLinkService::doReceivePacket(Transport::Packet&& packet)
 {
-    NS_LOG_ERROR("ValDummyLinkService::doReceivePacket -> This should never happend!!!");
+    NS_LOG_ERROR("ValDummyLinkService::doReceivePacket -> This should never happen!!!");
     BOOST_ASSERT(false);
 }
 

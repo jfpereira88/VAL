@@ -7,13 +7,12 @@
 #define VAL_FACE_DUMMY_LINK_SERVICE_HPP
 
 #include "NFD/daemon/face/link-service.hpp"
-#include "NFD/daemon/face/face-log.hpp"
 #include "../fw/val-forwarder.hpp"
-
 
 namespace ns3 {
 namespace ndn {
 namespace val {
+class ValForwarder;
 namespace face {
 
 using ::nfd::face::LinkService;
@@ -40,7 +39,7 @@ private:
     doReceivePacket(Transport::Packet&& packet) override;
 
     void
-    doSendDataToVal(const Data& data, std::vector<const uint32_t> *nonceList) override;
+    doSendDataToVal(const Data& data, std::vector<const uint32_t> *nonceList, bool isProcucer) override;
 
     void
     doSendInterestToVal(const Interest& interest) override;

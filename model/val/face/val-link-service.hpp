@@ -11,6 +11,7 @@
 #include "ns3/ndnSIM/NFD/daemon/face/lp-fragmenter.hpp"
 #include "ns3/ndnSIM/NFD/daemon/face/lp-reassembler.hpp"
 #include "ns3/ndnSIM/NFD/daemon/face/lp-reliability.hpp"
+#include "ns3/log.h"
 
 #include <ndn-cxx/util/time.hpp>
 
@@ -79,6 +80,10 @@ public:
   /** \brief count of incoming ValPackets
    */
   nfd::PacketCounter nInValPkt;
+
+  /** \brief count of outgoing ValPackets
+   */
+  nfd::PacketCounter nOutValPkt;
 };
 
 /** \brief ValLinkService is a LinkService that implements the NDNLPv2 protocol
@@ -160,16 +165,14 @@ public:
   const Counters&
   getCounters() const override;
 
-private:
-  
+private: // send path 
   /** \brief send an LpPacket fragment
+   *  send to transport using LinkService::sendPacket()
    *  \param pkt LpPacket to send
    */
   void
   sendLpPacket(lp::Packet&& pkt);
 
-
-private: // send path
   /** \brief encode link protocol fields from tags onto an outgoing LpPacket
    *  \param netPkt network-layer packet to extract tags from
    *  \param lpPacket LpPacket to add link protocol fields to
@@ -177,8 +180,8 @@ private: // send path
   void
   encodeLpFields(const ndn::PacketBase& netPkt, lp::Packet& lpPacket);
 
-  /** \brief send a complete network layer packet
-   *  \param pkt LpPacket containing a complete network layer packet
+  /** \brief send a complete Val layer packet
+   *  \param pkt LpPacket containing a complete Val  layer packet
    */
   void
   sendValPacket(lp::Packet&& pkt);
@@ -199,6 +202,12 @@ private: // send path
    */
   void
   checkCongestionLevel(lp::Packet& pkt);
+  
+  /** \brief method that is call by LinkService to send a Val packet
+   *  \param valPacket a val layer packet
+   */
+  void
+  doSendValPacket(const ndn::Block& valPacket) override;
 
 private: // receive path
   /** \brief receive Packet from Transport
@@ -243,24 +252,6 @@ inline const ValLinkService::Counters&
 ValLinkService::getCounters() const
 {
   return *this;
-}
-
-inline void
-ValLinkService::doSendInterest(const Interest& interest)
-{
-  return;
-}
-
-inline void
-ValLinkService::doSendData(const Data& data)
-{
-  return;
-}
-
-inline void
-ValLinkService::doSendNack(const lp::Nack& nack)
-{
-  return;
 }
 
 } // namespace face    

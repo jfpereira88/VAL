@@ -5,17 +5,17 @@
 
 #include "val-link-service.hpp"
 
+#include "ns3/log.h"
+
 #include <ndn-cxx/lp/tags.hpp>
 
-#include <cmath>
+NS_LOG_COMPONENT_DEFINE("ndn.val.face.ValLinkService");
 
 namespace ns3 {
 namespace ndn {
 namespace val {
 namespace face {
 
-
-NFD_LOG_INIT(ValLinkService);
 
 constexpr uint32_t DEFAULT_CONGESTION_THRESHOLD_DIVISOR = 2;
 
@@ -40,7 +40,7 @@ ValLinkService::setOptions(const ValLinkService::Options& options)
   m_reassembler.setOptions(m_options.reassemblerOptions);
 }
 
-
+// send packet exit point
 void
 ValLinkService::sendLpPacket(lp::Packet&& pkt)
 {
@@ -53,7 +53,7 @@ ValLinkService::sendLpPacket(lp::Packet&& pkt)
   Transport::Packet tp(pkt.wireEncode());
   if (mtu != MTU_UNLIMITED && tp.packet.size() > static_cast<size_t>(mtu)) {
     ++this->nOutOverMtu;
-    NFD_LOG_FACE_WARN("attempted to send packet over MTU limit");
+    NS_LOG_WARN("attempted to send packet over MTU limit");
     return;
   }
   this->sendPacket(std::move(tp));
@@ -173,7 +173,7 @@ ValLinkService::checkCongestionLevel(lp::Packet& pkt)
   }
 
   if (sendQueueLength > 0) {
-    NFD_LOG_FACE_TRACE("txqlen=" << sendQueueLength << " threshold=" << congestionThreshold <<
+    NS_LOG_DEBUG("txqlen=" << sendQueueLength << " threshold=" << congestionThreshold <<
                        " capacity=" << getTransport()->getSendQueueCapacity());
   }
 
@@ -188,7 +188,7 @@ ValLinkService::checkCongestionLevel(lp::Packet& pkt)
       // Time to mark packet
       pkt.set<lp::CongestionMarkField>(1);
       ++nCongestionMarked;
-      NFD_LOG_FACE_DEBUG("LpPacket was marked as congested");
+      NS_LOG_DEBUG("LpPacket was marked as congested");
 
       ++m_nMarkedSinceInMarkingState;
       // Decrease the marking interval by the inverse of the square root of the number of packets
@@ -201,26 +201,27 @@ ValLinkService::checkCongestionLevel(lp::Packet& pkt)
   }
   else if (m_nextMarkTime != time::steady_clock::TimePoint::max()) {
     // Congestion incident has ended, so reset
-    NFD_LOG_FACE_DEBUG("Send queue length dropped below congestion threshold");
+    NS_LOG_DEBUG("Send queue length dropped below congestion threshold");
     m_nextMarkTime = time::steady_clock::TimePoint::max();
     m_nMarkedSinceInMarkingState = 0;
   }
 }
 
+// receive packet entry point
 void
-ValLinkService::doReceivePacket(Transport::Packet&& packet)
+ValLinkService::doReceivePacket(Transport::Packet&& packet) 
 {
   try {
     lp::Packet pkt(packet.packet);
 
     if (!pkt.has<lp::FragmentField>()) {
-      NFD_LOG_FACE_TRACE("received IDLE packet: DROP");
+      NS_LOG_ERROR("received IDLE packet: DROP");
       return;
     }
 
     if ((pkt.has<lp::FragIndexField>() || pkt.has<lp::FragCountField>()) &&
         !m_options.allowReassembly) {
-      NFD_LOG_FACE_WARN("received fragment, but reassembly disabled: DROP");
+      NS_LOG_WARN("received fragment, but reassembly disabled: DROP");
       return;
     }
 
@@ -232,18 +233,51 @@ ValLinkService::doReceivePacket(Transport::Packet&& packet)
     if (isReassembled) {
         // send to val-forwarder here
         ++this->nInValPkt;
-        this->receiveValPkt(std::move(valPkt));
+        this->receiveValPacket(std::move(valPkt));
        
     }
   }
   catch (const tlv::Error& e) {
     ++this->nInLpInvalid;
-    NFD_LOG_FACE_WARN("packet parse error (" << e.what() << "): DROP");
+    NS_LOG_WARN("packet parse error (" << e.what() << "): DROP");
   }
 }
 
+// send packet entry point
+void
+ValLinkService::doSendValPacket(const ndn::Block& valPacket)
+{
+  Interest interest(valPacket);
+
+  lp::Packet lpPacket(interest.wireEncode());
+
+  encodeLpFields(interest, lpPacket);
+
+  this->sendValPacket(std::move(lpPacket));
+}
 
 
+// override pure virtual methods
+void
+ValLinkService::doSendInterest(const Interest& interest)
+{
+    NS_LOG_ERROR("ValLinkService::doSendInterest -> This should never happen!!!");
+    BOOST_ASSERT(false);
+}
+
+void
+ValLinkService::doSendData(const Data& data)
+{
+    NS_LOG_ERROR("ValLinkService::doSendData -> This should never happen!!!");
+    BOOST_ASSERT(false);
+}
+
+void
+ValLinkService::doSendNack(const lp::Nack& nack)
+{
+    NS_LOG_ERROR("ValLinkService::doSendNack -> This should never happen!!!");
+    BOOST_ASSERT(false);
+}
 
 
 } // namespace face

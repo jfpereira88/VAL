@@ -8,25 +8,20 @@
 
 #include <memory>
 #include <ndn-cxx/interest.hpp>
-
-namespace nfd {
-namespace face {
-    class Face;
-}
-}
-
-using ::ndn::Interest;
+#include "ns3/ndnSIM/NFD/daemon/face/face.hpp"
+//#include "../val-common.hpp"
 
 namespace ns3 {
 namespace ndn {
 namespace val {
 namespace ifnt {
 
+
 class Entry
 {
 public:
     explicit
-    Entry(const Interest& interest, const nfd::face::Face& face);
+    Entry(const ::ndn::Interest& interest, ::nfd::FaceId faceId);
 
     Entry(const Entry& entry);
 
@@ -44,17 +39,16 @@ public:
         return m_da;
     }
 
-    const nfd::face::Face&
-    getFace() const
+    ::nfd::FaceId
+    getFaceId() const
     {
-        return m_face;
+        return m_faceId;
     }
     
 private:
     uint32_t m_nonce;
     uint32_t m_da;
-    // unmutable pointer to const variable
-    const nfd::face::Face& m_face;
+    ::nfd::FaceId m_faceId;
 };
 
 bool

@@ -5,15 +5,17 @@
 
 #include "val-ifnt-entry.hpp"
 
+
 namespace ns3 {
 namespace ndn {
 namespace val {
 namespace ifnt {
 
-    Entry::Entry(const Interest& interest, const nfd::face::Face& face)
+
+    Entry::Entry(const ::ndn::Interest& interest,  ::nfd::FaceId faceId)
         : m_nonce(interest.getNonce())
         , m_da(0)
-        , m_face(face)
+        , m_faceId(faceId)
     {
     }
 
@@ -21,7 +23,7 @@ namespace ifnt {
     Entry::Entry(const Entry& entry)
         : m_nonce(entry.getNonce())
         , m_da(entry.getDA())
-        , m_face(entry.getFace())
+        , m_faceId(entry.getFaceId())
     {
     }
 

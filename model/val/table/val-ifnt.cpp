@@ -58,6 +58,18 @@ namespace ifnt {
        
     }
 
+    std::pair<std::shared_ptr<const Entry>, bool>
+    Ifnt::findMatchByNonce(const uint32_t nonce)
+    {
+        
+        for (auto it = m_table.begin(); it != m_table.end(); it++) {
+            if(it->get()->getNonce() == nonce)
+                return std::make_pair(std::make_shared<const Entry>(*it->get()), it != m_table.end());
+        }
+        return std::make_pair(nullptr, false);
+    }
+
+
 
 } // namespace ifnt
 } // namespcae val

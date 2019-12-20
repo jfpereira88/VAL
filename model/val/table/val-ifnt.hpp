@@ -16,7 +16,7 @@
 #include <list>    // better for adding and removing elements
 #include <vector>  // faster
 #include <memory>  // for smart pointers
-#include <algorithm>
+
 #include "val-ifnt-entry.hpp"
 
 

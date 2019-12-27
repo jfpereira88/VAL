@@ -4,7 +4,9 @@
  */
 
 #include "val-forwarder.hpp"
+#include "ns3/ndnSIM/model/ndn-l3-protocol.hpp"
 #include "ns3/log.h"
+
 
 NS_LOG_COMPONENT_DEFINE("ndn.val.ValForwarder");
 
@@ -25,8 +27,10 @@ ValForwarder::ValForwarder(L3Protocol& l3P)
     , m_geofaceFactory(*this)
     , m_invalidIN(0)
 {
+    NS_LOG_DEBUG("Creating VAL"); 
     m_faceTable = &(m_l3P->getForwarder()->getFaceTable());
     m_faceTable->afterValFaceAdd.connect([this] (Face& face) {
+      NS_LOG_DEBUG("Adding ValNetFace? "<< std::boolalpha << face.isValNetFace());
       addToNetworkFaceList(face);
       face.afterReceiveValPkt.connect(
         [this, &face] (const ndn::Block& valP) {
@@ -37,9 +41,12 @@ ValForwarder::ValForwarder(L3Protocol& l3P)
     m_faceTable->beforeValFaceRemove.connect([this] (Face& face) {
         cleanupOnFaceRemoval(face);
     });
-    // TODO: it is possible to know if a geoface have been removed,
+    // TODO: it is possible to know if a geoface have been removed by NFD,
     // beforeFaceRemove check this
     m_geoface = m_geofaceFactory.makeGeoface(); //just for now
+    m_l3P->addFace(m_geoface); //temp
+    nfd::fib::Entry* entry = m_l3P->getForwarder()->getFib().insert("/").first;
+    entry->addOrUpdateNextHop(*m_geoface, 0, 1);
 }
 
 ValForwarder::~ValForwarder()
@@ -49,6 +56,7 @@ ValForwarder::~ValForwarder()
 void
 ValForwarder::onReceivedValPacket(const Face& face, const ndn::Block& valP)
 {
+  NS_LOG_DEBUG(__func__);
   //@TODO valP must be parsed to extrect ValPacket Headers
   try {
     switch (valP.type()) {
@@ -81,6 +89,7 @@ ValForwarder::onReceivedValPacket(const Face& face, const ndn::Block& valP)
 void
 ValForwarder::processInterestFromNetwork(const Face& face, const Block& valH, const Interest& interest)
 {
+  NS_LOG_DEBUG(__func__);
   // add ifnt entry
   ifnt::Entry entry(interest, face.getId());
   m_ifnt.addEntry(entry);
@@ -90,15 +99,48 @@ ValForwarder::processInterestFromNetwork(const Face& face, const Block& valH, co
 void
 ValForwarder::processDataFromNetwork(const Face& face, const Block& valH, const Data& data)
 {
+  NS_LOG_DEBUG(__func__);
+  dfnt::Entry entry(data, face.getId());
+  m_dfnt.addEntry(entry);
   m_geoface->sendDataToForwarder(std::move(data));
 }
 
 void
-ValForwarder::reveiceInterest(const Interest& interest)
+ValForwarder::reveiceInterest(const nfd::Face *inGeoface, const Interest& interest)
 {
+  NS_LOG_DEBUG(__func__);
   auto pair = m_ifnt.findMatchByNonce(interest.getNonce());
   ::ndn::Block valPkt(interest.wireEncode());
-  if(pair.second) {
+  size_t size = m_networkFaces.size();
+  NS_LOG_DEBUG("size of NetworkFaces Table: "<< size);
+  if (pair.second) {
+    NS_LOG_DEBUG("Interest from network");
+    if(size > 1){
+      // get a network face diferent from the incoming network face
+      Face* face = getOtherNetworkFace(pair.first->getFaceId());
+      if(face != nullptr && face->isValNetFace()){
+        NS_LOG_DEBUG("Send Valpkt to ValNetFace, "<< face->getId() << "incomming Face " << pair.first->getFaceId());
+        face->sendValPacket(std::move(valPkt)); // no Val packet yet
+      }
+    } else {
+      Face* face = getNetworkFace(*m_networkFaces.begin());
+      if(face != nullptr && face->isValNetFace()){
+        face->sendValPacket(std::move(valPkt)); // no Val packet yet
+      }
+    }
+  } else {
+    NS_LOG_DEBUG("Interest generated locally");
+    Face* face = getNetworkFace(*m_networkFaces.begin());
+    if(face == nullptr)
+      NS_LOG_DEBUG("NetValFace is null");
+    NS_LOG_DEBUG("isValNetFace? "<< std::boolalpha << face->isValNetFace());
+    if(face != nullptr && face->isValNetFace()){
+      NS_LOG_DEBUG("Send Valpkt to ValNetFace, "<< face->getId());
+      face->sendValPacket(std::move(valPkt)); // no Val packet yet
+    }
+  }
+  
+  /*if(pair.second) {
     Face* face = getNetworkFace(pair.first->getFaceId());
     if(face != nullptr && face->isValNetFace()){
       face->sendValPacket(std::move(valPkt)); // no Val packet yet
@@ -109,17 +151,42 @@ ValForwarder::reveiceInterest(const Interest& interest)
     if(face != nullptr && face->isValNetFace()){
       face->sendValPacket(std::move(valPkt)); // no Val packet yet
     }
-  }
+  }*/
 }
 
 void
-ValForwarder::reveiceData(const Data& data, std::vector<const uint32_t> *nonceList, bool isProducer)
+ValForwarder::reveiceData(const nfd::Face *inGeoface, const Data& data, std::vector<const uint32_t> *nonceList, bool isProducer)
 {
+  NS_LOG_DEBUG(__func__);
   ::ndn::Block valPkt(data.wireEncode());
-  Face* face = getNetworkFace(*m_networkFaces.begin());
+  auto entry = m_dfnt.findMatch(data.getSignature().getSignatureInfo(), 0);
+  size_t size = m_networkFaces.size();
+  if(entry != nullptr) {
+    NS_LOG_DEBUG("Data from network");
+    if(size > 1){
+      // get a network face diferent from the incoming network face
+      Face* face = getOtherNetworkFace(entry->getFaceId());
+      if(face != nullptr && face->isValNetFace()){
+        face->sendValPacket(std::move(valPkt)); // no Val packet yet
+      }
+    } else {
+      Face* face = getNetworkFace(*m_networkFaces.begin());
+      if(face != nullptr && face->isValNetFace()){
+        face->sendValPacket(std::move(valPkt)); // no Val packet yet
+      }
+    }
+  } else {
+    NS_LOG_DEBUG("Data generated locally");
+    Face* face = getNetworkFace(*m_networkFaces.begin());
     if(face != nullptr && face->isValNetFace()){
       face->sendValPacket(std::move(valPkt)); // no Val packet yet
     }
+  }
+  /*
+  Face* face = getNetworkFace(*m_networkFaces.begin());
+  if(face != nullptr && face->isValNetFace()){
+    face->sendValPacket(std::move(valPkt)); // no Val packet yet
+  }*/
 }
 
 void
@@ -131,6 +198,7 @@ ValForwarder::cleanupOnFaceRemoval(const Face& face)
 Face*
 ValForwarder::getNetworkFace(nfd::FaceId faceId)
 {
+  NS_LOG_DEBUG(__func__ << "FaceId: " << faceId);
   auto it = m_networkFaces.begin();
   while (it != m_networkFaces.end()) {
     if (*it == faceId) {
@@ -139,8 +207,30 @@ ValForwarder::getNetworkFace(nfd::FaceId faceId)
         if (it_faces->getId() == faceId) {
           return &*it_faces;
         }
+        it_faces++;
       }
     }
+    it++;
+  }
+  return nullptr;
+}
+
+Face*
+ValForwarder::getOtherNetworkFace(nfd::FaceId faceId)
+{
+  NS_LOG_DEBUG(__func__);
+  auto it = m_networkFaces.begin();
+  while (it != m_networkFaces.end()) {
+    if (*it != faceId) {
+      auto it_faces = m_faceTable->begin();
+      while (it_faces != m_faceTable->end()) {
+        if (it_faces->getId() == *it) {
+          return &*it_faces;
+        }
+        it_faces++;
+      }
+    }
+    it++;
   }
   return nullptr;
 }
@@ -148,12 +238,14 @@ ValForwarder::getNetworkFace(nfd::FaceId faceId)
 void
 ValForwarder::addToNetworkFaceList(const Face& face)
 {
+  NS_LOG_DEBUG(__func__);
   m_networkFaces.push_back(face.getId());
 }
 
 void
 ValForwarder::removeFromNetworkFaceList(const Face& face)
 {
+  NS_LOG_DEBUG(__func__);
   auto it = m_networkFaces.begin();
   while (it != m_networkFaces.end()){
     if(*it == face.getId()) {

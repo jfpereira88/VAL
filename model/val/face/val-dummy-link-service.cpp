@@ -25,14 +25,20 @@ void
 ValDummyLinkService::doSendDataToVal(const Data& data, std::vector<const uint32_t> *nonceList, bool isProducer)
 {
     BOOST_ASSERT(m_valFwd != nullptr);
-    m_valFwd->reveiceData(data, nonceList, isProducer);
+    NS_LOG_DEBUG("Sending Data to ValFwd " << data.getName() << 
+                " : via face " << this->getFace()->getId() << 
+                " is Geoface? " << this->getFace()->isGeoFace());
+    m_valFwd->reveiceData(this->getFace(), data, nonceList, isProducer);
 }
 
 void
 ValDummyLinkService::doSendInterestToVal(const Interest& interest)
 {
+    NS_LOG_DEBUG("Sending Interest to ValFwd " << interest.getName() << 
+                " : via face " << this->getFace()->getId() << 
+                " is Geoface? " << this->getFace()->isGeoFace());
     BOOST_ASSERT(m_valFwd != nullptr);
-    m_valFwd->reveiceInterest(interest);
+    m_valFwd->reveiceInterest(this->getFace(), interest);
 }
 
 

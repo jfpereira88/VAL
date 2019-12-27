@@ -9,10 +9,10 @@
 #include "NFD/daemon/fw/face-table.hpp"
 #include "NFD/daemon/fw/forwarder.hpp"
 
-#include "../../ndn-l3-protocol.hpp"
 
 #include "../val-packet.hpp"
 #include "../table/val-ifnt.hpp"
+#include "../table/val-dfnt.hpp"
 #include "../face/val-geoface-factory.hpp"
 
 #include <list>
@@ -24,6 +24,7 @@ class Interest;
 
 namespace ns3 {
 namespace ndn {
+    class L3Protocol;
 namespace val {
 
 
@@ -31,14 +32,14 @@ class ValForwarder
 {
 
 public:
-    ValForwarder(L3Protocol& l3P);
+    ValForwarder(ndn::L3Protocol& l3P);
     ~ValForwarder();
 public:
     void
-    reveiceInterest(const Interest& interest);
+    reveiceInterest(const nfd::Face *inGeoface, const Interest& interest);
 
     void
-    reveiceData(const Data& data, std::vector<const uint32_t> *nonceList, bool isProducer);
+    reveiceData(const nfd::Face *inGeoface, const Data& data, std::vector<const uint32_t> *nonceList, bool isProducer);
 
 private:
     void
@@ -62,10 +63,14 @@ private:
     Face*
     getNetworkFace(nfd::FaceId faceId);
 
+    Face*
+    getOtherNetworkFace(nfd::FaceId faceId);
+
 private:
-    L3Protocol *m_l3P; // add faces with this
+    ndn::L3Protocol *m_l3P; // add faces with this
     nfd::FaceTable *m_faceTable;
     ifnt::Ifnt m_ifnt;
+    dfnt::Dfnt m_dfnt;
     std::shared_ptr<nfd::face::Face> m_geoface;
     face::GeofaceFactory m_geofaceFactory;
     std::list<nfd::FaceId> m_networkFaces;

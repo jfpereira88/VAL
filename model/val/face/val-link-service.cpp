@@ -9,6 +9,8 @@
 
 #include <ndn-cxx/lp/tags.hpp>
 
+#include <boost/stacktrace.hpp>
+
 NS_LOG_COMPONENT_DEFINE("ndn.val.face.ValLinkService");
 
 namespace ns3 {
@@ -56,6 +58,7 @@ ValLinkService::sendLpPacket(lp::Packet&& pkt)
     NS_LOG_WARN("attempted to send packet over MTU limit");
     return;
   }
+   NS_LOG_DEBUG("send packet to transport");
   this->sendPacket(std::move(tp));
 }
 
@@ -233,6 +236,7 @@ ValLinkService::doReceivePacket(Transport::Packet&& packet)
     if (isReassembled) {
         // send to val-forwarder here
         ++this->nInValPkt;
+        NS_LOG_DEBUG("sending val packet to valforwarder");
         this->receiveValPacket(std::move(valPkt));
        
     }
@@ -247,13 +251,28 @@ ValLinkService::doReceivePacket(Transport::Packet&& packet)
 void
 ValLinkService::doSendValPacket(const ndn::Block& valPacket)
 {
-  Interest interest(valPacket);
-
-  lp::Packet lpPacket(interest.wireEncode());
-
-  encodeLpFields(interest, lpPacket);
-
-  this->sendValPacket(std::move(lpPacket));
+  NS_LOG_DEBUG(__func__);
+  switch (valPacket.type()) {
+      case tlv::Interest:
+      { 
+        Interest interest(valPacket);
+        lp::Packet lpPacket(interest.wireEncode());
+        encodeLpFields(interest, lpPacket);
+        this->sendValPacket(std::move(lpPacket));
+        break;
+      }
+      case tlv::Data:
+      {
+        Data data(valPacket);
+        lp::Packet lpPacket(data.wireEncode());
+        encodeLpFields(data, lpPacket);
+        this->sendValPacket(std::move(lpPacket));
+        break;
+      }
+      default:
+        NS_LOG_DEBUG("unrecognized network-layer packet TLV-TYPE " << valPacket.type() << ": DROP");
+        return;
+    }
 }
 
 
@@ -262,6 +281,7 @@ void
 ValLinkService::doSendInterest(const Interest& interest)
 {
     NS_LOG_ERROR("ValLinkService::doSendInterest -> This should never happen!!!");
+    std::cout << boost::stacktrace::stacktrace();
     BOOST_ASSERT(false);
 }
 

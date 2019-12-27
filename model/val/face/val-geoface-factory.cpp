@@ -38,7 +38,7 @@ std::shared_ptr<nfd::face::Face>
 GeofaceFactory::makeGeoface(){
     auto dummyLink = make_unique<ValDummyLinkService>(m_valFwd);
     auto transport = make_unique<NullTransport>("geoFace://", "geoFace://",
-                                              ::ndn::nfd::FACE_SCOPE_LOCAL);
+                                              ::ndn::nfd::FACE_SCOPE_NON_LOCAL);
     auto face = std::make_shared<Face>(std::move(dummyLink), std::move(transport));
     face->setGeoFace();
     face->setMetric(1);

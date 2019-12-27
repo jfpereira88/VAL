@@ -171,6 +171,7 @@ private:
   // note that shared_ptr needed for Python bindings
 
   std::shared_ptr<::nfd::Forwarder> m_forwarder;
+  std::shared_ptr<val::ValForwarder> m_val;
   std::unique_ptr<::nfd::face::FaceSystem> m_faceSystem;
 
   std::shared_ptr<::nfd::face::Face> m_internalFace;
@@ -211,6 +212,7 @@ void
 L3Protocol::initialize()
 {
   m_impl->m_forwarder = make_shared<::nfd::Forwarder>();
+  m_impl->m_val = make_shared<val::ValForwarder>(*this);
 
   ::nfd::FaceTable& faceTable = m_impl->m_forwarder->getFaceTable();
   faceTable.addReserved(::nfd::face::makeNullFace(), ::nfd::face::FACEID_NULL);

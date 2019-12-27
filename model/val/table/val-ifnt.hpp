@@ -38,7 +38,7 @@ public:
     ~Ifnt();
     
     /** \brief Adds entry to IFNT
-    *  \param entry a unique pointer tothe IFNT Entry
+    *  \param entry a IFNT Entry
     *  \return true for success
     */
     void

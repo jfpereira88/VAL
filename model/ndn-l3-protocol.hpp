@@ -21,6 +21,7 @@
 #define NDN_L3_PROTOCOL_H
 
 #include "ns3/ndnSIM/model/ndn-common.hpp"
+#include "ns3/ndnSIM/model/val/fw/val-forwarder.hpp"
 
 #include <list>
 #include <vector>

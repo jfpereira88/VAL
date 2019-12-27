@@ -37,6 +37,8 @@
 #include "utils/dummy-keychain.hpp"
 #include "model/cs/ndn-content-store.hpp"
 
+#include "model/val/face/val-link-service.hpp"
+
 #include <limits>
 #include <map>
 #include <boost/lexical_cast.hpp>
@@ -307,18 +309,21 @@ StackHelper::PointToPointNetDeviceCallback(Ptr<Node> node, Ptr<L3Protocol> ndn,
     remoteNetDevice = channel->GetDevice(1);
 
   // Create an ndnSIM-specific transport instance
-  ::nfd::face::GenericLinkService::Options opts;
+  //::nfd::face::GenericLinkService::Options opts;
+  val::face::ValLinkService::Options opts;
   opts.allowFragmentation = true;
   opts.allowReassembly = true;
   opts.allowCongestionMarking = true;
 
-  auto linkService = make_unique<::nfd::face::GenericLinkService>(opts);
+  //auto linkService = make_unique<::nfd::face::GenericLinkService>(opts);
+  auto linkService = make_unique<val::face::ValLinkService>(opts);
 
   auto transport = make_unique<NetDeviceTransport>(node, netDevice,
                                                    constructFaceUri(netDevice),
                                                    constructFaceUri(remoteNetDevice));
 
   auto face = std::make_shared<Face>(std::move(linkService), std::move(transport));
+  face->setValNetFace();
   face->setMetric(1);
 
   ndn->addFace(face);

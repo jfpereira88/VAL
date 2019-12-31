@@ -10,7 +10,7 @@
 #include "NFD/daemon/fw/forwarder.hpp"
 
 
-#include "../val-packet.hpp"
+#include "../val-header.hpp"
 #include "../table/val-ifnt.hpp"
 #include "../table/val-dfnt.hpp"
 #include "../face/val-geoface-factory.hpp"

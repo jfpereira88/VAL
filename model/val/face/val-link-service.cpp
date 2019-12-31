@@ -58,7 +58,7 @@ ValLinkService::sendLpPacket(lp::Packet&& pkt)
     NS_LOG_WARN("attempted to send packet over MTU limit");
     return;
   }
-   NS_LOG_DEBUG("send packet to transport");
+  NS_LOG_DEBUG("send packet to transport");
   this->sendPacket(std::move(tp));
 }
 
@@ -96,6 +96,7 @@ ValLinkService::encodeLpFields(const ndn::PacketBase& valPkt, lp::Packet& lpPack
   else {
     lpPacket.add<lp::HopCountTagField>(0);
   }
+  lpPacket.add<lp::ValHeaderField>(ValHeader());
 }
 
 void
@@ -216,7 +217,6 @@ ValLinkService::doReceivePacket(Transport::Packet&& packet)
 {
   try {
     lp::Packet pkt(packet.packet);
-
     if (!pkt.has<lp::FragmentField>()) {
       NS_LOG_ERROR("received IDLE packet: DROP");
       return;
@@ -229,16 +229,33 @@ ValLinkService::doReceivePacket(Transport::Packet&& packet)
     }
 
     bool isReassembled = false;
-    Block valPkt;
+    Block netPkt;
     lp::Packet firstPkt;
-    std::tie(isReassembled, valPkt, firstPkt) = m_reassembler.receiveFragment(packet.remoteEndpoint,
+    std::tie(isReassembled, netPkt, firstPkt) = m_reassembler.receiveFragment(packet.remoteEndpoint,
                                                                               pkt);
     if (isReassembled) {
-        // send to val-forwarder here
-        ++this->nInValPkt;
-        NS_LOG_DEBUG("sending val packet to valforwarder");
-        this->receiveValPacket(std::move(valPkt));
-       
+      // at this point we have the NDNPacket in wire format (netPkt)
+      // and the NDNLPv2 Headers (firstPkt)
+      // we need to extract ValHeader from firstPkt
+      ndn::Block wire = firstPkt.wireEncode();
+      for(ndn::Block block : wire.elements()) {
+        if(block.type() == ::ndn::lp::tlv::ValHeader) {
+          block.parse(); // to get all the tlv subelements
+          ValHeader valH(block); // we now have the ValHeader object
+          NS_LOG_DEBUG("ValHeader Msg: " << valH.getMsg());
+          break;
+          // now lets create the ValPacket
+          // the ValPacket is just an object that agregates the
+          // ValHeader and the NDNPacket (data or interest)
+          // this NDNPacket first needs to be tagged with the information 
+          // from the Headers of the NDNLPv2 protocol
+          // this tagged information is not used, but it can be usefull in future work
+        }
+      }
+      ++this->nInValPkt;
+      // send to val-forwarder here
+      NS_LOG_DEBUG("sending val packet to valforwarder");
+      this->receiveValPacket(std::move(netPkt));
     }
   }
   catch (const tlv::Error& e) {
@@ -252,6 +269,11 @@ void
 ValLinkService::doSendValPacket(const ndn::Block& valPacket)
 {
   NS_LOG_DEBUG(__func__);
+  // Here we receive a ValPacket that contains the ValHeader
+  // and a tagged NDNPacket we need to pass the tagged information
+  // to the NDNPLv2 packet (lpPacket)
+  // as also the ValHeader information
+  
   switch (valPacket.type()) {
       case tlv::Interest:
       { 

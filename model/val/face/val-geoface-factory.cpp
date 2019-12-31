@@ -12,18 +12,6 @@ namespace ndn {
 namespace val {
 namespace face {
 
-/*GeofaceFactory::GeofaceFactory()
-{
-}
-
-GeofaceFactory::~GeofaceFactory()
-{
-}
-
-std::shared_ptr<nfd::face::Face>
-GeofaceFactory::makeGeoface(){
-   return nullptr;
-}*/
 
 GeofaceFactory::GeofaceFactory(ValForwarder& valFwd)
     : m_valFwd(valFwd)

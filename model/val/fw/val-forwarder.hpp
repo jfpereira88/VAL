@@ -10,7 +10,7 @@
 #include "NFD/daemon/fw/forwarder.hpp"
 
 
-#include "../val-header.hpp"
+#include "../val-packet.hpp"
 #include "../table/val-ifnt.hpp"
 #include "../table/val-dfnt.hpp"
 #include "../face/val-geoface-factory.hpp"
@@ -43,13 +43,13 @@ public:
 
 private:
     void
-    onReceivedValPacket(const Face& face, const Block& valP);
+    onReceivedValPacket(const Face& face, const ValPacket& valP);
 
     void
-    processInterestFromNetwork(const Face& face, const Block& valH, const Interest& interest);
+    processInterestFromNetwork(const Face& face, const ValHeader& valH, const Interest& interest);
 
     void
-    processDataFromNetwork(const Face& face, const Block& valH, const Data& data);
+    processDataFromNetwork(const Face& face, const ValHeader& valH, const Data& data);
 
     void
     cleanupOnFaceRemoval(const Face& face);

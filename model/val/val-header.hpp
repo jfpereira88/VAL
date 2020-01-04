@@ -21,6 +21,8 @@ using ::ndn::Block;
  */
 class ValHeader
 {
+static const uint8_t MAXHOPS = 9;
+
 public:
   class Error : public ::ndn::tlv::Error
   {
@@ -29,6 +31,9 @@ public:
   };
 
   ValHeader();
+  
+  ValHeader(std::string SA, std::string DA, std::string phPos,
+                        std::string RN, uint8_t hopC);
 
   explicit
   ValHeader(const Block& block);
@@ -52,12 +57,45 @@ public:
   void
   wireDecode(const Block& wire);
 
+  // gets and sets
   std::string
-  getMsg() const;
+  getSA() const;
+
+  std::string
+  getDA() const;
+
+  std::string
+  getPhPos() const;
+
+  std::string
+  getRN() const;
+
+  uint8_t
+  getHopC() const;
+  
+  void
+  setSA(std::string SA);
+
+  void
+  setDA(std::string DA);
+
+  void
+  setPhPos(std::string phPos);
+
+  void
+  setRN(std::string RN);
+
+  void
+  setHopC(uint8_t hopC);
+
 
 private:
   mutable Block m_wire;
-  std::string m_msg;
+  std::string m_SA;      // source area
+  std::string m_DA;      // destination area
+  std::string m_phPos;   // previous hop position
+  std::string m_RN;      // root name
+  uint8_t m_hopC;        // hop count decressing 
 };
 
 NDN_CXX_DECLARE_WIRE_ENCODE_INSTANTIATIONS(ValHeader);

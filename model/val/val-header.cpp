@@ -12,7 +12,21 @@ namespace val {
 
 
 ValHeader::ValHeader()
-    :m_msg("Hello from VAL")
+    : m_SA("TEST")
+    , m_DA("TEST")
+    , m_phPos("TEST")
+    , m_RN("TEST")
+    , m_hopC(0)
+{
+}
+
+ValHeader::ValHeader(std::string SA, std::string DA, std::string phPos,
+                        std::string RN, uint8_t hopC)
+    : m_SA(SA)
+    , m_DA(DA)
+    , m_phPos(phPos)
+    , m_RN(RN)
+    , m_hopC(hopC)
 {
 }
 
@@ -26,7 +40,11 @@ size_t
 ValHeader::wireEncode(::ndn::EncodingImpl<TAG>& encoder) const
 {
   size_t length = 0;
-  length += ::ndn::encoding::prependStringBlock(encoder, ::ndn::lp::tlv::ValHeaderMsg, m_msg);
+  length += ::ndn::encoding::prependStringBlock(encoder, ::ndn::lp::tlv::ValHeaderSA, m_SA);
+  length += ::ndn::encoding::prependStringBlock(encoder, ::ndn::lp::tlv::ValHeaderDA, m_DA);
+  length += ::ndn::encoding::prependStringBlock(encoder, ::ndn::lp::tlv::ValHeaderPhPos, m_phPos);
+  length += ::ndn::encoding::prependStringBlock(encoder, ::ndn::lp::tlv::ValHeaderRN, m_RN);
+  length += ::ndn::encoding::prependNonNegativeIntegerBlock(encoder, ::ndn::lp::tlv::ValHeaderHopC, m_hopC);
   length += encoder.prependVarNumber(length);
   length += encoder.prependVarNumber(::ndn::lp::tlv::ValHeader);
   return length;
@@ -64,17 +82,92 @@ ValHeader::wireDecode(const Block& wire)
   m_wire.parse();
 
   Block::element_const_iterator it = m_wire.elements_begin();
-  if (it != m_wire.elements_end() && it->type() == ::ndn::lp::tlv::ValHeaderMsg) {
-    m_msg = ::ndn::encoding::readString(*it);
-  }
-  else {
-    BOOST_THROW_EXCEPTION(Error("expecting ValHeaderMsg block"));
+  while (it != m_wire.elements_end()) {
+    switch (it->type())
+    {
+    case ::ndn::lp::tlv::ValHeaderSA:
+        m_SA = ::ndn::encoding::readString(*it);
+        break;
+    case ::ndn::lp::tlv::ValHeaderDA:
+        m_DA = ::ndn::encoding::readString(*it);
+        break;
+    case ::ndn::lp::tlv::ValHeaderPhPos:
+        m_phPos = ::ndn::encoding::readString(*it);
+        break;
+    case ::ndn::lp::tlv::ValHeaderRN:
+        m_RN = ::ndn::encoding::readString(*it);
+        break;
+    case ::ndn::lp::tlv::ValHeaderHopC:
+        m_hopC = ::ndn::encoding::readNonNegativeInteger(*it);
+        break;
+    default:
+        BOOST_THROW_EXCEPTION(Error("expecting ValHeader subblocks"));  
+        break;
+    }
+    it++;
   }
 }
 
+
+// gets and sets
 std::string
-ValHeader::getMsg() const {
-    return m_msg;
+ValHeader::getSA() const {
+    return m_SA;
+}
+
+std::string
+ValHeader::getDA() const {
+    return m_DA;
+}
+
+std::string
+ValHeader::getPhPos() const {
+    return m_phPos;
+}
+
+std::string
+ValHeader::getRN() const {
+    return m_RN;
+}
+
+uint8_t
+ValHeader::getHopC() const {
+    return m_hopC;
+}
+
+void
+ValHeader::setSA(std::string SA) 
+{
+    // TODO: some format control must be done
+    m_SA = SA;
+}
+
+void
+ValHeader::setDA(std::string DA) 
+{
+    // TODO: some format control must be done
+    m_DA = DA;
+}
+
+void
+ValHeader::setPhPos(std::string phPos) 
+{
+    // TODO: some format control must be done
+    m_phPos = phPos;
+}
+
+void
+ValHeader::setRN(std::string RN) 
+{
+    // TODO: some format control must be done
+    m_RN = RN;
+}
+
+void
+ValHeader::setHopC(uint8_t hopC) 
+{
+  if(hopC <= ValHeader::MAXHOPS)
+    m_hopC = hopC;
 }
 
 } // namespace ns3

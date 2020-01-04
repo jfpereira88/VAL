@@ -207,13 +207,19 @@ private: // send path
    *  \param valPacket a val layer packet
    */
   void
-  doSendValPacket(const ndn::Block& valPacket) override;
+  doSendValPacket(const ::ns3::ndn::val::ValPacket& valPacket) override;
 
 private: // receive path
   /** \brief receive Packet from Transport
    */
   void
   doReceivePacket(Transport::Packet&& packet) override;
+  
+  std::shared_ptr<::ndn::Interest>
+  decodeInterest(const Block& netPkt, const lp::Packet& firstPkt);
+
+  std::shared_ptr<::ndn::Data>
+  decodeData(const Block& netPkt, const lp::Packet& firstPkt);
 
 private: // pure virtual methods from LinkService that are not used but need to be define
   void

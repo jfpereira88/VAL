@@ -5,6 +5,8 @@
 
 #include "val-link-service.hpp"
 
+#include "../val-packet.hpp"
+
 #include "ns3/log.h"
 
 #include <ndn-cxx/lp/tags.hpp>
@@ -63,40 +65,39 @@ ValLinkService::sendLpPacket(lp::Packet&& pkt)
 }
 
 void
-ValLinkService::encodeLpFields(const ndn::PacketBase& valPkt, lp::Packet& lpPacket)
+ValLinkService::encodeLpFields(const ndn::PacketBase& netPkt, lp::Packet& lpPacket)
 {
   if (m_options.allowLocalFields) {
-    shared_ptr<lp::IncomingFaceIdTag> incomingFaceIdTag = valPkt.getTag<lp::IncomingFaceIdTag>();
+    shared_ptr<lp::IncomingFaceIdTag> incomingFaceIdTag = netPkt.getTag<lp::IncomingFaceIdTag>();
     if (incomingFaceIdTag != nullptr) {
       lpPacket.add<lp::IncomingFaceIdField>(*incomingFaceIdTag);
     }
   }
 
-  shared_ptr<lp::CongestionMarkTag> congestionMarkTag = valPkt.getTag<lp::CongestionMarkTag>();
+  shared_ptr<lp::CongestionMarkTag> congestionMarkTag = netPkt.getTag<lp::CongestionMarkTag>();
   if (congestionMarkTag != nullptr) {
     lpPacket.add<lp::CongestionMarkField>(*congestionMarkTag);
   }
 
   if (m_options.allowSelfLearning) {
-    shared_ptr<lp::NonDiscoveryTag> nonDiscoveryTag = valPkt.getTag<lp::NonDiscoveryTag>();
+    shared_ptr<lp::NonDiscoveryTag> nonDiscoveryTag = netPkt.getTag<lp::NonDiscoveryTag>();
     if (nonDiscoveryTag != nullptr) {
       lpPacket.add<lp::NonDiscoveryField>(*nonDiscoveryTag);
     }
 
-    shared_ptr<lp::PrefixAnnouncementTag> prefixAnnouncementTag = valPkt.getTag<lp::PrefixAnnouncementTag>();
+    shared_ptr<lp::PrefixAnnouncementTag> prefixAnnouncementTag = netPkt.getTag<lp::PrefixAnnouncementTag>();
     if (prefixAnnouncementTag != nullptr) {
       lpPacket.add<lp::PrefixAnnouncementField>(*prefixAnnouncementTag);
     }
   }
 
-  shared_ptr<lp::HopCountTag> hopCountTag = valPkt.getTag<lp::HopCountTag>();
+  shared_ptr<lp::HopCountTag> hopCountTag = netPkt.getTag<lp::HopCountTag>();
   if (hopCountTag != nullptr) {
     lpPacket.add<lp::HopCountTagField>(*hopCountTag);
   }
   else {
     lpPacket.add<lp::HopCountTagField>(0);
   }
-  lpPacket.add<lp::ValHeaderField>(ValHeader());
 }
 
 void
@@ -242,20 +243,41 @@ ValLinkService::doReceivePacket(Transport::Packet&& packet)
         if(block.type() == ::ndn::lp::tlv::ValHeader) {
           block.parse(); // to get all the tlv subelements
           ValHeader valH(block); // we now have the ValHeader object
-          NS_LOG_DEBUG("ValHeader Msg: " << valH.getMsg());
-          break;
+          NS_LOG_DEBUG("ValHeader SA: " << valH.getSA());
+          NS_LOG_DEBUG("ValHeader DA: " << valH.getDA());
+          NS_LOG_DEBUG("ValHeader phPOS: " << valH.getPhPos());
+          NS_LOG_DEBUG("ValHeader RN: " << valH.getRN());
+          NS_LOG_DEBUG("ValHeader hopC: " << std::to_string(valH.getHopC()));
           // now lets create the ValPacket
           // the ValPacket is just an object that agregates the
           // ValHeader and the NDNPacket (data or interest)
           // this NDNPacket first needs to be tagged with the information 
           // from the Headers of the NDNLPv2 protocol
           // this tagged information is not used, but it can be usefull in future work
+          ValPacket valPkt(valH);
+          switch (netPkt.type())
+          {
+          case ::ndn::tlv::Interest:
+          {
+            valPkt.setInterest(decodeInterest(netPkt, firstPkt));
+            break;
+          }
+          case ::ndn::tlv::Data:
+          {
+            valPkt.setData(decodeData(netPkt, firstPkt));
+            break;
+          }  
+          default:
+            NS_LOG_ERROR("this should never happend!");
+            break;
+          }
+          ++this->nInValPkt;
+          // send to val-forwarder here
+          NS_LOG_DEBUG("sending val packet to valforwarder");
+          this->receiveValPacket(std::move(valPkt));
+          break;
         }
       }
-      ++this->nInValPkt;
-      // send to val-forwarder here
-      NS_LOG_DEBUG("sending val packet to valforwarder");
-      this->receiveValPacket(std::move(netPkt));
     }
   }
   catch (const tlv::Error& e) {
@@ -264,9 +286,122 @@ ValLinkService::doReceivePacket(Transport::Packet&& packet)
   }
 }
 
+std::shared_ptr<::ndn::Interest>
+ValLinkService::decodeInterest(const Block& netPkt, const lp::Packet& firstPkt)
+{
+  BOOST_ASSERT(netPkt.type() == tlv::Interest);
+  BOOST_ASSERT(!firstPkt.has<lp::NackField>());
+
+  // forwarding expects Interest to be created with make_shared
+  auto interest = make_shared<Interest>(netPkt);
+
+  // Increment HopCount
+  if (firstPkt.has<lp::HopCountTagField>()) {
+    interest->setTag(make_shared<lp::HopCountTag>(firstPkt.get<lp::HopCountTagField>() + 1));
+  }
+
+  if (firstPkt.has<lp::NextHopFaceIdField>()) {
+    if (m_options.allowLocalFields) {
+      interest->setTag(make_shared<lp::NextHopFaceIdTag>(firstPkt.get<lp::NextHopFaceIdField>()));
+    }
+    else {
+      NS_LOG_WARN("received NextHopFaceId, but local fields disabled: DROP");
+      return nullptr;
+    }
+  }
+
+  if (firstPkt.has<lp::CachePolicyField>()) {
+    ++this->nInNetInvalid;
+    NS_LOG_WARN("received CachePolicy with Interest: DROP");
+    return nullptr;
+  }
+
+  if (firstPkt.has<lp::IncomingFaceIdField>()) {
+    NS_LOG_WARN("received IncomingFaceId: IGNORE");
+  }
+
+  if (firstPkt.has<lp::CongestionMarkField>()) {
+    interest->setTag(make_shared<lp::CongestionMarkTag>(firstPkt.get<lp::CongestionMarkField>()));
+  }
+
+  if (firstPkt.has<lp::NonDiscoveryField>()) {
+    if (m_options.allowSelfLearning) {
+      interest->setTag(make_shared<lp::NonDiscoveryTag>(firstPkt.get<lp::NonDiscoveryField>()));
+    }
+    else {
+      NS_LOG_WARN("received NonDiscovery, but self-learning disabled: IGNORE");
+    }
+  }
+
+  if (firstPkt.has<lp::PrefixAnnouncementField>()) {
+    ++this->nInNetInvalid;
+    NS_LOG_WARN("received PrefixAnnouncement with Interest: DROP");
+    return nullptr;
+  }
+
+  return interest;
+}
+
+std::shared_ptr<::ndn::Data>
+ValLinkService::decodeData(const Block& netPkt, const lp::Packet& firstPkt)
+{
+  BOOST_ASSERT(netPkt.type() == tlv::Data);
+
+  // forwarding expects Data to be created with make_shared
+  auto data = make_shared<Data>(netPkt);
+
+  if (firstPkt.has<lp::HopCountTagField>()) {
+    data->setTag(make_shared<lp::HopCountTag>(firstPkt.get<lp::HopCountTagField>() + 1));
+  }
+
+  if (firstPkt.has<lp::NackField>()) {
+    ++this->nInNetInvalid;
+    NS_LOG_WARN("received Nack with Data: DROP");
+    return nullptr;
+  }
+
+  if (firstPkt.has<lp::NextHopFaceIdField>()) {
+    ++this->nInNetInvalid;
+    NS_LOG_WARN("received NextHopFaceId with Data: DROP");
+    return nullptr;
+  }
+
+  if (firstPkt.has<lp::CachePolicyField>()) {
+    // CachePolicy is unprivileged and does not require allowLocalFields option.
+    // In case of an invalid CachePolicyType, get<lp::CachePolicyField> will throw,
+    // so it's unnecessary to check here.
+    data->setTag(make_shared<lp::CachePolicyTag>(firstPkt.get<lp::CachePolicyField>()));
+  }
+
+  if (firstPkt.has<lp::IncomingFaceIdField>()) {
+    NS_LOG_WARN("received IncomingFaceId: IGNORE");
+  }
+
+  if (firstPkt.has<lp::CongestionMarkField>()) {
+    data->setTag(make_shared<lp::CongestionMarkTag>(firstPkt.get<lp::CongestionMarkField>()));
+  }
+
+  if (firstPkt.has<lp::NonDiscoveryField>()) {
+    ++this->nInNetInvalid;
+    NS_LOG_WARN("received NonDiscovery with Data: DROP");
+    return nullptr;
+  }
+
+  if (firstPkt.has<lp::PrefixAnnouncementField>()) {
+    if (m_options.allowSelfLearning) {
+      data->setTag(make_shared<lp::PrefixAnnouncementTag>(firstPkt.get<lp::PrefixAnnouncementField>()));
+    }
+    else {
+      NS_LOG_WARN("received PrefixAnnouncement, but self-learning disabled: IGNORE");
+    }
+  }
+
+  return data;
+}
+
 // send packet entry point
 void
-ValLinkService::doSendValPacket(const ndn::Block& valPacket)
+ValLinkService::doSendValPacket(const ::ns3::ndn::val::ValPacket& valPacket)
 {
   NS_LOG_DEBUG(__func__);
   // Here we receive a ValPacket that contains the ValHeader
@@ -274,25 +409,27 @@ ValLinkService::doSendValPacket(const ndn::Block& valPacket)
   // to the NDNPLv2 packet (lpPacket)
   // as also the ValHeader information
   
-  switch (valPacket.type()) {
-      case tlv::Interest:
+  switch (valPacket.isSet()) {
+      case ValPacket::INTEREST_SET:
       { 
-        Interest interest(valPacket);
+        Interest interest(valPacket.getInterest());
         lp::Packet lpPacket(interest.wireEncode());
         encodeLpFields(interest, lpPacket);
+        lpPacket.add<lp::ValHeaderField>(valPacket.getValHeader());
         this->sendValPacket(std::move(lpPacket));
         break;
       }
-      case tlv::Data:
+      case ValPacket::DATA_SET:
       {
-        Data data(valPacket);
+        Data data(valPacket.getData());
         lp::Packet lpPacket(data.wireEncode());
         encodeLpFields(data, lpPacket);
+        lpPacket.add<lp::ValHeaderField>(valPacket.getValHeader());
         this->sendValPacket(std::move(lpPacket));
         break;
       }
       default:
-        NS_LOG_DEBUG("unrecognized network-layer packet TLV-TYPE " << valPacket.type() << ": DROP");
+        NS_LOG_DEBUG("unrecognized network-layer packet TLV-TYPE " << valPacket.isSet() << ": DROP");
         return;
     }
 }

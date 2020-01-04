@@ -8,6 +8,7 @@
 #include "ns3/log.h"
 
 
+
 NS_LOG_COMPONENT_DEFINE("ndn.val.ValForwarder");
 
 namespace ns3 {
@@ -33,7 +34,7 @@ ValForwarder::ValForwarder(L3Protocol& l3P)
       NS_LOG_DEBUG("Adding ValNetFace? "<< std::boolalpha << face.isValNetFace());
       addToNetworkFaceList(face);
       face.afterReceiveValPkt.connect(
-        [this, &face] (const ndn::Block& valP) {
+        [this, &face] (const ValPacket& valP) {
           onReceivedValPacket(face, valP);
         });
     });
@@ -54,29 +55,29 @@ ValForwarder::~ValForwarder()
 }
 
 void
-ValForwarder::onReceivedValPacket(const Face& face, const ndn::Block& valP)
+ValForwarder::onReceivedValPacket(const Face& face, const ValPacket& valP)
 {
   NS_LOG_DEBUG(__func__);
   //@TODO valP must be parsed to extrect ValPacket Headers
   try {
-    switch (valP.type()) {
-      case tlv::Interest:
+    switch (valP.isSet()) {
+      case ValPacket::INTEREST_SET:
       { // braces to avoid "transfer of control bypasses" problem
         // forwarding expects Interest to be created with make_shared
-        auto interest = make_shared<Interest>(valP);
-        processInterestFromNetwork(face, valP, *interest);
+        auto interest = make_shared<Interest>(valP.getInterest());
+        processInterestFromNetwork(face, valP.getValHeader(), *interest);
         break;
       }
-      case tlv::Data:
+      case ValPacket::DATA_SET:
       {
         // forwarding expects Interest to be created with make_shared
-        auto data = make_shared<Data>(valP);
-        processDataFromNetwork(face, valP, *data);
+        auto data = make_shared<Data>(valP.getData());
+        processDataFromNetwork(face, valP.getValHeader(), *data);
         break;
       }
       default:
         m_invalidIN++;
-        NS_LOG_DEBUG("unrecognized network-layer packet TLV-TYPE " << valP.type() << ": DROP");
+        NS_LOG_DEBUG("unrecognized network-layer packet TLV-TYPE " << valP.isSet() << ": DROP");
         return;
     }
   }
@@ -87,7 +88,7 @@ ValForwarder::onReceivedValPacket(const Face& face, const ndn::Block& valP)
 }
 
 void
-ValForwarder::processInterestFromNetwork(const Face& face, const Block& valH, const Interest& interest)
+ValForwarder::processInterestFromNetwork(const Face& face, const ValHeader& valH, const Interest& interest)
 {
   NS_LOG_DEBUG(__func__);
   // add ifnt entry
@@ -97,7 +98,7 @@ ValForwarder::processInterestFromNetwork(const Face& face, const Block& valH, co
 }
 
 void
-ValForwarder::processDataFromNetwork(const Face& face, const Block& valH, const Data& data)
+ValForwarder::processDataFromNetwork(const Face& face, const ValHeader& valH, const Data& data)
 {
   NS_LOG_DEBUG(__func__);
   dfnt::Entry entry(data, face.getId());
@@ -110,7 +111,11 @@ ValForwarder::reveiceInterest(const nfd::Face *inGeoface, const Interest& intere
 {
   NS_LOG_DEBUG(__func__);
   auto pair = m_ifnt.findMatchByNonce(interest.getNonce());
-  ::ndn::Block valPkt(interest.wireEncode());
+  ValHeader valH;
+  valH.setSA(interest.getName().toUri());
+  valH.setDA(std::to_string(interest.getNonce()));
+  ValPacket valPkt(valH);
+  valPkt.setInterest(std::make_shared<Interest>(interest));
   size_t size = m_networkFaces.size();
   NS_LOG_DEBUG("size of NetworkFaces Table: "<< size);
   if (pair.second) {
@@ -120,12 +125,12 @@ ValForwarder::reveiceInterest(const nfd::Face *inGeoface, const Interest& intere
       Face* face = getOtherNetworkFace(pair.first->getFaceId());
       if(face != nullptr && face->isValNetFace()){
         NS_LOG_DEBUG("Send Valpkt to ValNetFace, "<< face->getId() << "incomming Face " << pair.first->getFaceId());
-        face->sendValPacket(std::move(valPkt)); // no Val packet yet
+        face->sendValPacket(std::move(valPkt)); 
       }
     } else {
       Face* face = getNetworkFace(*m_networkFaces.begin());
       if(face != nullptr && face->isValNetFace()){
-        face->sendValPacket(std::move(valPkt)); // no Val packet yet
+        face->sendValPacket(std::move(valPkt)); 
       }
     }
   } else {
@@ -136,20 +141,20 @@ ValForwarder::reveiceInterest(const nfd::Face *inGeoface, const Interest& intere
     NS_LOG_DEBUG("isValNetFace? "<< std::boolalpha << face->isValNetFace());
     if(face != nullptr && face->isValNetFace()){
       NS_LOG_DEBUG("Send Valpkt to ValNetFace, "<< face->getId());
-      face->sendValPacket(std::move(valPkt)); // no Val packet yet
+      face->sendValPacket(std::move(valPkt)); 
     }
   }
   
   /*if(pair.second) {
     Face* face = getNetworkFace(pair.first->getFaceId());
     if(face != nullptr && face->isValNetFace()){
-      face->sendValPacket(std::move(valPkt)); // no Val packet yet
+      face->sendValPacket(std::move(valPkt)); 
     }
   } else { // Interest was generated locally
     // first network face to be added
     Face* face = getNetworkFace(*m_networkFaces.begin());
     if(face != nullptr && face->isValNetFace()){
-      face->sendValPacket(std::move(valPkt)); // no Val packet yet
+      face->sendValPacket(std::move(valPkt)); 
     }
   }*/
 }
@@ -158,7 +163,11 @@ void
 ValForwarder::reveiceData(const nfd::Face *inGeoface, const Data& data, std::vector<const uint32_t> *nonceList, bool isProducer)
 {
   NS_LOG_DEBUG(__func__);
-  ::ndn::Block valPkt(data.wireEncode());
+  ValHeader valHeader;
+  valHeader.setRN(data.getName().toUri());
+  valHeader.setPhPos(std::to_string(data.getSignature().getType()));
+  ValPacket valPkt(valHeader);
+  valPkt.setData(std::make_shared<Data>(data));
   auto entry = m_dfnt.findMatch(data.getSignature().getSignatureInfo(), 0);
   size_t size = m_networkFaces.size();
   if(entry != nullptr) {
@@ -167,25 +176,25 @@ ValForwarder::reveiceData(const nfd::Face *inGeoface, const Data& data, std::vec
       // get a network face diferent from the incoming network face
       Face* face = getOtherNetworkFace(entry->getFaceId());
       if(face != nullptr && face->isValNetFace()){
-        face->sendValPacket(std::move(valPkt)); // no Val packet yet
+        face->sendValPacket(std::move(valPkt)); 
       }
     } else {
       Face* face = getNetworkFace(*m_networkFaces.begin());
       if(face != nullptr && face->isValNetFace()){
-        face->sendValPacket(std::move(valPkt)); // no Val packet yet
+        face->sendValPacket(std::move(valPkt)); 
       }
     }
   } else {
     NS_LOG_DEBUG("Data generated locally");
     Face* face = getNetworkFace(*m_networkFaces.begin());
     if(face != nullptr && face->isValNetFace()){
-      face->sendValPacket(std::move(valPkt)); // no Val packet yet
+      face->sendValPacket(std::move(valPkt)); 
     }
   }
   /*
   Face* face = getNetworkFace(*m_networkFaces.begin());
   if(face != nullptr && face->isValNetFace()){
-    face->sendValPacket(std::move(valPkt)); // no Val packet yet
+    face->sendValPacket(std::move(valPkt)); 
   }*/
 }
 

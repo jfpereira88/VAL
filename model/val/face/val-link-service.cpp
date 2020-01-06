@@ -268,7 +268,7 @@ ValLinkService::doReceivePacket(Transport::Packet&& packet)
             break;
           }  
           default:
-            NS_LOG_ERROR("this should never happend!");
+            NS_LOG_ERROR("this should never happen!");
             break;
           }
           ++this->nInValPkt;

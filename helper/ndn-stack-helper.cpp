@@ -270,18 +270,21 @@ StackHelper::DefaultNetDeviceCallback(Ptr<Node> node, Ptr<L3Protocol> ndn,
   NS_LOG_DEBUG("Creating default Face on node " << node->GetId());
 
   // Create an ndnSIM-specific transport instance
-  ::nfd::face::GenericLinkService::Options opts;
+  //::nfd::face::GenericLinkService::Options opts;
+  val::face::ValLinkService::Options opts;
   opts.allowFragmentation = true;
   opts.allowReassembly = true;
   opts.allowCongestionMarking = true;
 
-  auto linkService = make_unique<::nfd::face::GenericLinkService>(opts);
+  //auto linkService = make_unique<::nfd::face::GenericLinkService>(opts);
+  auto linkService = make_unique<val::face::ValLinkService>(opts);
 
   auto transport = make_unique<NetDeviceTransport>(node, netDevice,
                                                    constructFaceUri(netDevice),
                                                    "netdev://[ff:ff:ff:ff:ff:ff]");
 
   auto face = std::make_shared<Face>(std::move(linkService), std::move(transport));
+  face->setValNetFace();
   face->setMetric(1);
 
   ndn->addFace(face);

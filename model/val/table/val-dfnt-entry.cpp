@@ -11,9 +11,12 @@ namespace val {
 namespace dfnt {
 
 
-Entry::Entry(const ::ndn::Data& data, ::nfd::FaceId faceId)
-    : m_sigInfo(data.getSignature().getSignatureInfo())
-    , m_sa(0)
+Entry::Entry(const ValHeader& valHeader, const ::ndn::Data& data, uint64_t faceId)
+    : m_sa(valHeader.getSA())
+    , m_sig(data.getSignature())
+    , m_phPos(valHeader.getPhPos())
+    , m_hopC(valHeader.getHopC())
+    , m_rn(valHeader.getRN())
     , m_faceId(faceId)
 {
 }
@@ -22,29 +25,50 @@ Entry::~Entry()
 {
 }
 
-const ::ndn::SignatureInfo
-Entry::getSignatureInfo() const 
-{
-    return m_sigInfo;
-}
-
-const uint32_t
+const std::string
 Entry::getSA() const 
 {
     return m_sa;
 }
 
-const ::nfd::FaceId
+const ::ndn::Signature
+Entry::getSignature() const 
+{
+    return m_sig;
+}
+
+const std::string
+Entry::getPhPos() const
+{
+    return m_phPos;
+}
+
+const uint8_t
+Entry::getHopC() const
+{
+    return m_hopC;
+}
+
+const std::string
+Entry::getRN() const
+{
+    return m_rn;
+}
+
+const uint64_t
 Entry::getFaceId() const 
 {
     return m_faceId;
 }
 
- bool
+bool
 operator==(const Entry& l_entry, const Entry& r_entry)
 {
-    return (l_entry.getSignatureInfo() == r_entry.getSignatureInfo() && 
-            l_entry.getSA() == r_entry.getSA() && 
+    return (l_entry.getSA() == r_entry.getSA() &&
+            l_entry.getSignature() == r_entry.getSignature() && 
+            l_entry.getPhPos() == r_entry.getPhPos() &&
+            l_entry.getHopC() == r_entry.getHopC() &&
+            l_entry.getRN() == r_entry.getRN() &&
             l_entry.getFaceId() == r_entry.getFaceId());
 }
 

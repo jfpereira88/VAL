@@ -3,8 +3,8 @@
  * mieti - uminho
  */
 
-#ifndef VAL_VALHEADER_HPP
-#define VAL_VALHEADER_HPP
+#ifndef VAL_HEADER_HPP
+#define VAL_HEADER_HPP
 
 #include <ndn-cxx/encoding/block.hpp>
 #include "ndn-cxx/encoding/encoding-buffer.hpp"
@@ -97,6 +97,10 @@ private:
   std::string m_RN;      // root name
   uint8_t m_hopC;        // hop count decressing 
 };
+
+bool
+operator==(const ValHeader& lhs, const ValHeader& rhs);
+
 
 NDN_CXX_DECLARE_WIRE_ENCODE_INSTANTIATIONS(ValHeader);
 

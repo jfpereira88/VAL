@@ -7,8 +7,9 @@
 #define VAL_TABLE_DFNT_ENTRY_HPP
 
 #include <ndn-cxx/data.hpp>
-#include <ndn-cxx/signature-info.hpp>
-#include "ns3/ndnSIM/NFD/daemon/face/face.hpp"
+#include <string>
+
+#include "../val-header.hpp"
 
 
 namespace ns3 {
@@ -20,22 +21,34 @@ class Entry
 {
 
 public:
-    Entry(const ::ndn::Data& data, ::nfd::FaceId faceId);
+    Entry(const ValHeader& valHeader, const ::ndn::Data& data, uint64_t faceId);
     ~Entry();
 
-    const ::ndn::SignatureInfo
-    getSignatureInfo() const;
-
-    const uint32_t
+    const std::string
     getSA() const;
 
-    const ::nfd::FaceId
+    const ::ndn::Signature
+    getSignature() const;
+
+    const std::string
+    getPhPos() const;
+
+    const uint8_t
+    getHopC() const;
+
+    const std::string
+    getRN() const;
+
+    const uint64_t
     getFaceId() const;
 
 private:
-    ::ndn::SignatureInfo m_sigInfo;
-    uint32_t m_sa;
-    ::nfd::FaceId m_faceId;
+    std::string m_sa;        // source area
+    ::ndn::Signature m_sig;  // signature
+    std::string m_phPos;     // previous hop position
+    uint8_t m_hopC;          // hop count
+    std::string m_rn;        // root name
+    uint64_t m_faceId;
 };
 
 bool

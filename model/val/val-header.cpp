@@ -170,6 +170,16 @@ ValHeader::setHopC(uint8_t hopC)
     m_hopC = hopC;
 }
 
+bool
+operator==(const ValHeader& lhs, const ValHeader& rhs)
+{
+    return  lhs.getDA() == rhs.getDA() &&
+            lhs.getHopC() == rhs.getHopC() &&
+            lhs.getPhPos() == rhs.getPhPos() &&
+            lhs.getRN() == rhs.getRN() &&
+            lhs.getSA() == rhs.getSA();
+}
+
 } // namespace ns3
 }
 }

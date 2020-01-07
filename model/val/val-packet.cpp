@@ -6,6 +6,9 @@
 #include "val-packet.hpp"
 #include "ns3/log.h"
 
+#include <ndn-cxx/data.hpp>
+#include <ndn-cxx/interest.hpp>
+
 NS_LOG_COMPONENT_DEFINE("ndn.val.ValPacket");
 
 namespace ns3 {
@@ -68,6 +71,22 @@ const uint8_t
 ValPacket::isSet() const
 {
     return m_isSet;
+}
+
+bool
+operator==(const ValPacket& lhs, const ValPacket& rhs)
+{
+    if (lhs.isSet() != rhs.isSet()) {
+        return false;
+    } else if (lhs.isSet() == rhs.isSet() &&  lhs.isSet() == ValPacket::INTEREST_SET) {
+        return lhs.getValHeader() == rhs.getValHeader() &&
+                lhs.getInterest().getNonce() == rhs.getInterest().getNonce();
+    } else if (lhs.isSet() == rhs.isSet() &&  lhs.isSet() == ValPacket::DATA_SET) {
+        return lhs.getValHeader() == rhs.getValHeader() &&
+                lhs.getData().getSignature() == rhs.getData().getSignature();
+    } else {
+        return lhs.isSet() == rhs.isSet();  //ValPacket::NOT_SET -> true
+    }
 }
 
 } // namespace val

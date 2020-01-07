@@ -21,9 +21,9 @@ Dfnt::~Dfnt()
 }
 
 void
-Dfnt::addEntry(Entry& entry)
+Dfnt::addEntry(Entry&& entry)
 {
-     m_table.push_back(std::make_unique<Entry>(std::move(entry)));
+    m_table.push_back(std::make_unique<Entry>(entry));
     m_nItens++;
 }
 
@@ -33,7 +33,7 @@ Dfnt::removeEntry(const Entry& entry)
     std::list<std::unique_ptr<Entry>>::iterator it = m_table.begin();
     while (it != m_table.end())
     {
-        if (*it->get() == entry)
+        if (**it == entry)
         {
             m_table.erase(it);
             m_nItens--;
@@ -45,29 +45,31 @@ Dfnt::removeEntry(const Entry& entry)
 }
 
 bool
-Dfnt::removeEntryBySignatureInfoAndSA(::ndn::SignatureInfo info, uint32_t sa)
+Dfnt::removeEntryBySignatureAndSA(::ndn::Signature sig, std::string sa)
 {
     auto it = m_table.begin();
     while(it != m_table.end()) {
-        if(it->get()->getSignatureInfo() == info && it->get()->getSA() == sa) {
+        if((*it)->getSignature() == sig && (*it)->getSA() == sa) {
             m_table.erase(it);
             m_nItens--;
             return true;
         }
+        it++;
     }
     return false;
 }
 
-std::shared_ptr<const Entry>
-Dfnt::findMatch(::ndn::SignatureInfo info, uint32_t sa)
+std::pair<bool, const Entry&>
+Dfnt::findMatch(::ndn::Signature sig, std::string sa)
 {
     auto it = m_table.begin();
     while(it != m_table.end()) {
-        if(it->get()->getSignatureInfo() == info && it->get()->getSA() == sa) {
-            return std::make_shared<const Entry>(*it->get());
+        if((*it)->getSignature() == sig && (*it)->getSA() == sa) {
+            return {true, **it};
         }
+        it++;
     }
-    return nullptr;
+    return {false, **it};
 }
 
 } // namespace dfnt

@@ -29,7 +29,7 @@ public:
     *  \return true for success
     */
     void
-    addEntry(Entry& entry);
+    addEntry(Entry&& entry);
 
     /** \brief removes entry from DFNT
      *  \param entry a reference to the DFNT Entry to remove
@@ -39,10 +39,10 @@ public:
     removeEntry(const Entry& entry);
 
     bool
-    removeEntryBySignatureInfoAndSA(::ndn::SignatureInfo info, uint32_t sa);
+    removeEntryBySignatureAndSA(::ndn::Signature sig, std::string sa);
 
-    std::shared_ptr<const Entry>
-    findMatch(::ndn::SignatureInfo info, uint32_t sa);
+    std::pair<bool, const Entry&>
+    findMatch(::ndn::Signature sig, std::string sa);
 
     inline size_t
     getDfntSize()

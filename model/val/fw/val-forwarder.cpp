@@ -101,8 +101,8 @@ void
 ValForwarder::processDataFromNetwork(const Face& face, const ValHeader& valH, const Data& data)
 {
   NS_LOG_DEBUG(__func__);
-  dfnt::Entry entry(data, face.getId());
-  m_dfnt.addEntry(entry);
+  dfnt::Entry entry(valH, data, face.getId());
+  m_dfnt.addEntry(std::move(entry));
   m_geoface->sendDataToForwarder(std::move(data));
 }
 
@@ -168,13 +168,13 @@ ValForwarder::reveiceData(const nfd::Face *inGeoface, const Data& data, std::vec
   valHeader.setPhPos(std::to_string(data.getSignature().getType()));
   ValPacket valPkt(valHeader);
   valPkt.setData(std::make_shared<Data>(data));
-  auto entry = m_dfnt.findMatch(data.getSignature().getSignatureInfo(), 0);
+  auto entry = m_dfnt.findMatch(data.getSignature(), 0);
   size_t size = m_networkFaces.size();
-  if(entry != nullptr) {
+  if(entry.first) {
     NS_LOG_DEBUG("Data from network");
     if(size > 1){
       // get a network face diferent from the incoming network face
-      Face* face = getOtherNetworkFace(entry->getFaceId());
+      Face* face = getOtherNetworkFace(entry.second.getFaceId());
       if(face != nullptr && face->isValNetFace()){
         face->sendValPacket(std::move(valPkt)); 
       }

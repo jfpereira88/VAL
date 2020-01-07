@@ -3,8 +3,8 @@
  * mieti - uminho
  */
 
-#ifndef VAL_VALPACKET_HPP
-#define VAL_VALPACKET_HPP
+#ifndef VAL_PACKET_HPP
+#define VAL_PACKET_HPP
 
 #include "val-header.hpp"
 #include <memory>
@@ -54,6 +54,9 @@ private:
     std::shared_ptr<::ndn::Interest> m_interest;
     std::shared_ptr<::ndn::Data> m_data;
 };
+
+bool
+operator==(const ValPacket& lhs, const ValPacket& rhs);
 
 
 } // namespace val

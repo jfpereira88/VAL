@@ -40,7 +40,7 @@ PFT::addEntry(ValPacket&& valPkt)
 // it is equal if it has the same nonce, in the case of being an Interest Pkt
 // it is equal if it has the same signature, in the case of being a Data Pkt
 std::pair<bool, Entry&>
-PFT::findMatch(ValPacket& valPkt)
+PFT::findMatch(const ValPacket& valPkt)
 {
     auto it = m_pft.begin();
     for(; it != m_pft.end(); it++) {
@@ -61,7 +61,7 @@ PFT::findMatch(ValPacket& valPkt)
 }
 
 bool
-PFT::removeEntry(ValPacket& valPkt)
+PFT::removeEntry(const ValPacket& valPkt)
 {
     auto it = m_pft.begin();
     bool state = false;

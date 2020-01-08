@@ -44,10 +44,14 @@ ValForwarder::ValForwarder(L3Protocol& l3P)
     });
     // TODO: it is possible to know if a geoface have been removed by NFD,
     // beforeFaceRemove check this
-    m_geoface = m_geofaceFactory.makeGeoface(); //just for now
-    m_l3P->addFace(m_geoface); //temp
+
+    // creating flood face, adding to FIB as default route and adding to f2a table
+    auto floodFace = m_geofaceFactory.makeGeoface();
+    m_l3P->addFace(floodFace);  // adding face to face table
     nfd::fib::Entry* entry = m_l3P->getForwarder()->getFib().insert("/").first;
-    entry->addOrUpdateNextHop(*m_geoface, 0, 1);
+    entry->addOrUpdateNextHop(*floodFace, 0, 1);
+    f2a::Entry floodFaceEntry(floodFace->getId(), "0");  // this can only be made after adding face to face table
+    m_f2a.addEntry(std::move(floodFaceEntry));
 }
 
 ValForwarder::~ValForwarder()
@@ -58,7 +62,11 @@ void
 ValForwarder::onReceivedValPacket(const Face& face, const ValPacket& valP)
 {
   NS_LOG_DEBUG(__func__);
-  //@TODO valP must be parsed to extrect ValPacket Headers
+  // Is a broadcast from a node in a better possition or a Implicit ACK ?
+  if(!preProcessingValPacket(face, valP)) {
+    NS_LOG_DEBUG("Packet Dropped");
+    return;
+  }
   try {
     switch (valP.isSet()) {
       case ValPacket::INTEREST_SET:
@@ -87,14 +95,80 @@ ValForwarder::onReceivedValPacket(const Face& face, const ValPacket& valP)
   }
 }
 
+bool
+ValForwarder::preProcessingValPacket(const Face& face, const ValPacket& valP)
+{
+  // the first thing to do is to check it agains PFT and see if it is a
+  // transmission of a node in a better position or an Implicit ACK
+  // the PFT - Pending Forwarding Table entries identify both scenarios
+  auto pair = m_pft.findMatch(valP);
+  if(pair.first) {  // match found
+    // checking the pft entry state
+    if(pair.second.getState() == pft::Entry::WAITING_FORWARDING) { // a node in a better position made a broadcast
+      if(pair.second.getValPacket().getValHeader().getHopC() == valP.getValHeader().getHopC()) {
+        ::nfd::scheduler::cancel(pair.second.getTimerId()); // cancelling the forwarding timer
+        NS_LOG_DEBUG("Forwarding cancel due to broadcast of a node in a better position");
+        m_pft.removeEntry(valP);
+      } else {
+        NS_LOG_DEBUG("Forwarding not cancel due to difference in the hop count. Received: " <<
+                      std::to_string(valP.getValHeader().getHopC()) << " in PFT: " <<
+                      std::to_string(pair.second.getValPacket().getValHeader().getHopC()));
+      }
+    }
+    if(pair.second.getState() == pft::Entry::WAITING_IMPLICIT_ACK) {
+      // for implicit ACK the hop count is less one than the one in PFT
+      if(pair.second.getValPacket().getValHeader().getHopC() - 1 == valP.getValHeader().getHopC()) {
+        ::nfd::scheduler::cancel(pair.second.getTimerId()); // cancelling the forwarding timer
+        NS_LOG_DEBUG("Implicit ACK received, retransmission canceled");
+        m_pft.removeEntry(valP);
+      } else {
+        NS_LOG_DEBUG("Implicit ACK not cancel due to difference in the hop count. Received: " <<
+                      std::to_string(valP.getValHeader().getHopC()) << " in PFT: " <<
+                      std::to_string(pair.second.getValPacket().getValHeader().getHopC()));
+      }
+    }
+  }
+  return !pair.first; // true if no match is found
+}
+
+bool
+ValForwarder::isEscapedPacket(const ValHeader& valH)
+{
+  // this compares the destination area of the interest, the position of the previous hop
+  // and the current node position.
+  // if the previous node position is inside the destination area of the interest but
+  // the current position of the node is outside that same area, the interest is 
+  // dropped
+  return false;
+}
+
 void
 ValForwarder::processInterestFromNetwork(const Face& face, const ValHeader& valH, const Interest& interest)
 {
   NS_LOG_DEBUG(__func__);
+  // here we process an Interest packet that came from the network
+  if(isEscapedPacket(valH))
+    return;  // drop packet
   // add ifnt entry
   ifnt::Entry entry(valH, interest, face.getId());
-  m_ifnt.addEntry(entry);
-  m_geoface->sendInterestToForwarder(std::move(interest)); // temp
+  if(m_ifnt.addEntry(entry)) {  // added - no equal match found
+    // get or create geoface
+    auto pair = m_f2a.findByGeoArea(valH.getDA());
+    if(pair.first) { // match
+      nfd::Face* geoface = m_faceTable->get(pair.second.getFaceId()); // get geoface
+      geoface->sendInterestToForwarder(std::move(interest)); // send via geoface
+    } else { // no geoface for the destination area - lets create one
+      // creating geoface
+      auto geoface = m_geofaceFactory.makeGeoface();
+      // adding geoface to faceTable
+      m_l3P->addFace(geoface); // only after added to face table does the face has ID 
+      // creating an Entry in F2A
+      f2a::Entry entry(geoface->getId(), valH.getDA());
+      geoface->sendInterestToForwarder(std::move(interest)); // send via geoface
+    }
+  } else { // not added already has one entry with the same information
+    NS_LOG_DEBUG("THIS SHOULD NEVER HAPPEN!!");
+  }
 }
 
 void
@@ -102,8 +176,20 @@ ValForwarder::processDataFromNetwork(const Face& face, const ValHeader& valH, co
 {
   NS_LOG_DEBUG(__func__);
   dfnt::Entry entry(valH, data, face.getId());
-  m_dfnt.addEntry(std::move(entry));
-  m_geoface->sendDataToForwarder(std::move(data));
+  m_dfnt.addEntry(std::move(entry));  // adding to data from network table
+  auto pair = m_f2a.findByGeoArea(valH.getSA());
+  if(pair.first) { // match
+    nfd::Face* geoface = m_faceTable->get(pair.second.getFaceId()); // get geoface
+    geoface->sendDataToForwarder(std::move(data)); // send via geoface
+  } else { // no geoface for the destination area - lets create one
+    // creating geoface
+    auto geoface = m_geofaceFactory.makeGeoface();
+    // adding geoface to faceTable
+    m_l3P->addFace(geoface); // only after added to face table does the face has ID 
+    // creating an Entry in F2A
+    f2a::Entry entry(geoface->getId(), valH.getSA());
+    geoface->sendDataToForwarder(std::move(data)); // send via geoface
+  }
 }
 
 void

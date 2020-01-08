@@ -8,11 +8,13 @@
 
 #include "NFD/daemon/fw/face-table.hpp"
 #include "NFD/daemon/fw/forwarder.hpp"
-
+#include "NFD/core/scheduler.hpp"
 
 #include "../val-packet.hpp"
 #include "../table/val-ifnt.hpp"
 #include "../table/val-dfnt.hpp"
+#include "../table/val-pft.hpp"
+#include "../table/val-f2a.hpp"
 #include "../face/val-geoface-factory.hpp"
 
 #include <list>
@@ -66,12 +68,22 @@ private:
     Face*
     getOtherNetworkFace(nfd::FaceId faceId);
 
+    //received packet path
+    bool
+    preProcessingValPacket(const Face& face, const ValPacket& valP);
+
+    
+    // received Interest from network path
+    bool
+    isEscapedPacket(const ValHeader& valH);
+
 private:
-    ndn::L3Protocol *m_l3P; // add faces with this
+    ndn::L3Protocol *m_l3P; // add faces via this pointer
     nfd::FaceTable *m_faceTable;
     ifnt::Ifnt m_ifnt;
     dfnt::Dfnt m_dfnt;
-    std::shared_ptr<nfd::face::Face> m_geoface;
+    pft::PFT m_pft;
+    f2a::F2A m_f2a;
     face::GeofaceFactory m_geofaceFactory;
     std::list<nfd::FaceId> m_networkFaces;
     // counters

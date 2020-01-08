@@ -20,11 +20,15 @@ namespace ifnt {
         m_table.clear();
     }
 
-    void
+    bool
     Ifnt::addEntry(Entry& entry)
     {
-        m_table.push_back(std::make_unique<Entry>(std::move(entry)));
-        m_nItens++;
+        auto pair = findMatch(entry);
+        if(!pair.first) {
+            m_table.push_back(std::make_unique<Entry>(std::move(entry)));
+            m_nItens++;
+        }
+        return !pair.first;
     }
     
     bool 

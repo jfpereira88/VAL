@@ -41,7 +41,7 @@ public:
     *  \param entry a IFNT Entry
     *  \return true for success
     */
-    void
+    bool
     addEntry(Entry& entry);
 
     /** \brief removes entry from IFNT

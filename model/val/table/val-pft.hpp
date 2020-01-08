@@ -27,10 +27,10 @@ public:
     addEntry(ValPacket&& valPkt);
 
     std::pair<bool, Entry&>
-    findMatch(ValPacket& valPkt);
+    findMatch(const ValPacket& valPkt);
 
     bool
-    removeEntry(ValPacket& valPkt);
+    removeEntry(const ValPacket& valPkt);
 
     const size_t
     getSize() const; 

@@ -92,7 +92,7 @@ ValForwarder::processInterestFromNetwork(const Face& face, const ValHeader& valH
 {
   NS_LOG_DEBUG(__func__);
   // add ifnt entry
-  ifnt::Entry entry(interest, face.getId());
+  ifnt::Entry entry(valH, interest, face.getId());
   m_ifnt.addEntry(entry);
   m_geoface->sendInterestToForwarder(std::move(interest)); // temp
 }
@@ -122,9 +122,9 @@ ValForwarder::reveiceInterest(const nfd::Face *inGeoface, const Interest& intere
     NS_LOG_DEBUG("Interest from network");
     if(size > 1){
       // get a network face diferent from the incoming network face
-      Face* face = getOtherNetworkFace(pair.first->getFaceId());
+      Face* face = getOtherNetworkFace(pair.second->getFaceId());
       if(face != nullptr && face->isValNetFace()){
-        NS_LOG_DEBUG("Send Valpkt to ValNetFace, "<< face->getId() << "incomming Face " << pair.first->getFaceId());
+        NS_LOG_DEBUG("Send Valpkt to ValNetFace, "<< face->getId() << "incomming Face " << pair.second->getFaceId());
         face->sendValPacket(std::move(valPkt)); 
       }
     } else {

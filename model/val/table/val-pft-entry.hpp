@@ -8,6 +8,7 @@
 
 #include "ns3/ndnSIM/NFD/core/scheduler.hpp"
 
+
 namespace ns3 {
 namespace ndn {
 namespace val {
@@ -61,7 +62,7 @@ public:
     setTimer(::nfd::scheduler::EventId timerId);
 
 private:
-    std::unique_ptr<ValPacket> m_valPkt;
+    std::shared_ptr<ValPacket> m_valPkt;
     int m_state;
     int m_tries;
     ::nfd::scheduler::EventId m_timerId;

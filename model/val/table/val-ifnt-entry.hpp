@@ -6,66 +6,63 @@
 #ifndef VAL_TABLE_IFNT_ENTRY_HPP
 #define VAL_TABLE_IFNT_ENTRY_HPP
 
-#include <memory>
 #include <ndn-cxx/interest.hpp>
-#include "ns3/ndnSIM/NFD/daemon/face/face.hpp"
-//#include "../val-common.hpp"
+#include <string>
+
+#include "../val-header.hpp"
+
 
 namespace ns3 {
 namespace ndn {
 namespace val {
 namespace ifnt {
 
-
 class Entry
 {
+
 public:
-    explicit
-    Entry(const ::ndn::Interest& interest, ::nfd::FaceId faceId);
-
-    Entry(const Entry& entry);
-
+    Entry(const ValHeader& valHeader, const ::ndn::Interest& interest, uint64_t faceId);
     ~Entry();
-    
-    const uint32_t
-    getNonce() const
-    {
-        return m_nonce;
-    }
+
+    const std::string
+    getDA() const;
+
+    const std::string
+    getSA() const;
 
     const uint32_t
-    getDA() const
-    {
-        return m_da;
-    }
+    getNonce() const;
 
-    ::nfd::FaceId
-    getFaceId() const
-    {
-        return m_faceId;
-    }
-    
+    const std::string
+    getPhPos() const;
+
+    const uint8_t
+    getHopC() const;
+
+    const std::string
+    getRN() const;
+
+    const uint64_t
+    getFaceId() const;
+
 private:
-    uint32_t m_nonce;
-    uint32_t m_da;
-    ::nfd::FaceId m_faceId;
+    std::string m_da;
+    std::string m_sa;        // source area
+    uint32_t m_nonce;        // nonce
+    std::string m_phPos;     // previous hop position
+    uint8_t m_hopC;          // hop count
+    std::string m_rn;        // root name
+    uint64_t m_faceId;
 };
 
 bool
 operator==(const Entry& l_entry, const Entry& r_entry);
 
-bool
-operator==(std::shared_ptr<const Entry> l_entry, const Entry& r_entry);
-
-inline bool
-operator!=(const Entry& l_entry, const Entry& r_entry)
-{
-  return !(l_entry == r_entry);
-}
-
 } // namespace ifnt
-} // namespace val
+} // namespace val    
 } // namespace ndn
 } // namespace ns3
+
+
 
 #endif

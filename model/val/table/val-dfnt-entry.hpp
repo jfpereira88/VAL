@@ -27,6 +27,9 @@ public:
     const std::string
     getSA() const;
 
+    const std::string
+    getDA() const;
+
     const ::ndn::Signature
     getSignature() const;
 
@@ -44,6 +47,7 @@ public:
 
 private:
     std::string m_sa;        // source area
+    std::string m_da;
     ::ndn::Signature m_sig;  // signature
     std::string m_phPos;     // previous hop position
     uint8_t m_hopC;          // hop count

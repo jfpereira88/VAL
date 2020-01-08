@@ -5,51 +5,82 @@
 
 #include "val-ifnt-entry.hpp"
 
-
 namespace ns3 {
 namespace ndn {
 namespace val {
 namespace ifnt {
 
 
-    Entry::Entry(const ::ndn::Interest& interest,  ::nfd::FaceId faceId)
-        : m_nonce(interest.getNonce())
-        , m_da(0)
-        , m_faceId(faceId)
-    {
-    }
+Entry::Entry(const ValHeader& valHeader, const ::ndn::Interest& interest, uint64_t faceId)
+    : m_da(valHeader.getDA())
+    , m_sa(valHeader.getSA())
+    , m_nonce(interest.getNonce())
+    , m_phPos(valHeader.getPhPos())
+    , m_hopC(valHeader.getHopC())
+    , m_rn(valHeader.getRN())
+    , m_faceId(faceId)
+{
+}
 
-    // copy constructor
-    Entry::Entry(const Entry& entry)
-        : m_nonce(entry.getNonce())
-        , m_da(entry.getDA())
-        , m_faceId(entry.getFaceId())
-    {
-    }
+Entry::~Entry()
+{
+}
 
-    Entry::~Entry()
-    {
-    }
+const std::string
+Entry::getDA() const 
+{
+    return m_da;
+}
 
-    bool
-    operator==(const Entry& l_entry, const Entry& r_entry)
-    {
-        return (l_entry.getNonce() == r_entry.getNonce() && l_entry.getDA() == r_entry.getDA());
-    }
+const std::string
+Entry::getSA() const 
+{
+    return m_sa;
+}
 
-    bool
-    operator==(std::shared_ptr<const Entry> l_entry, const Entry& r_entry)
-    {
-        return ((l_entry.get())->getNonce() == r_entry.getNonce() && (l_entry.get())->getDA() == r_entry.getDA());
-    }
+const uint32_t
+Entry::getNonce() const 
+{
+    return m_nonce;
+}
 
-    bool
-    operator==(std::unique_ptr<const Entry> l_entry, const Entry& r_entry)
-    {
-        return ((l_entry.get())->getNonce() == r_entry.getNonce() && (l_entry.get())->getDA() == r_entry.getDA());
-    }
+const std::string
+Entry::getPhPos() const
+{
+    return m_phPos;
+}
 
-} // namespace ifnt 
-} // namespace val
+const uint8_t
+Entry::getHopC() const
+{
+    return m_hopC;
+}
+
+const std::string
+Entry::getRN() const
+{
+    return m_rn;
+}
+
+const uint64_t
+Entry::getFaceId() const 
+{
+    return m_faceId;
+}
+
+bool
+operator==(const Entry& l_entry, const Entry& r_entry)
+{
+    return (l_entry.getDA() == r_entry.getDA() &&
+            l_entry.getSA() == r_entry.getSA() &&
+            l_entry.getNonce() == r_entry.getNonce() && 
+            l_entry.getPhPos() == r_entry.getPhPos() &&
+            l_entry.getHopC() == r_entry.getHopC() &&
+            l_entry.getRN() == r_entry.getRN() &&
+            l_entry.getFaceId() == r_entry.getFaceId());
+}
+
+} // namespace ifnt
+} // namespace val    
 } // namespace ndn
 } // namespace ns3

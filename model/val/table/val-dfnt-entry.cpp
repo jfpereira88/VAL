@@ -13,6 +13,7 @@ namespace dfnt {
 
 Entry::Entry(const ValHeader& valHeader, const ::ndn::Data& data, uint64_t faceId)
     : m_sa(valHeader.getSA())
+    , m_da(valHeader.getDA())
     , m_sig(data.getSignature())
     , m_phPos(valHeader.getPhPos())
     , m_hopC(valHeader.getHopC())
@@ -29,6 +30,12 @@ const std::string
 Entry::getSA() const 
 {
     return m_sa;
+}
+
+const std::string
+Entry::getDA() const 
+{
+    return m_da;
 }
 
 const ::ndn::Signature
@@ -65,6 +72,7 @@ bool
 operator==(const Entry& l_entry, const Entry& r_entry)
 {
     return (l_entry.getSA() == r_entry.getSA() &&
+            l_entry.getDA() == r_entry.getDA() &&
             l_entry.getSignature() == r_entry.getSignature() && 
             l_entry.getPhPos() == r_entry.getPhPos() &&
             l_entry.getHopC() == r_entry.getHopC() &&

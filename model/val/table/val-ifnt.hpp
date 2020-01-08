@@ -59,40 +59,28 @@ public:
     removeEntryByNonce(const uint32_t nonce) 
     {
         auto pair = findMatchByNonce(nonce);
-        if(pair.second)
-            return removeEntry(*pair.first.get()); //pointed element
-        return pair.second;
+        if(pair.first)
+            return removeEntry(*pair.second); //pointed element
+        return pair.first;
     }
 
     /** \brief removes entries from IFNT by nonce list
      *  \param nonceList a pointer to the list of nonces
-     *  \return true for success
      */
-    bool
-    removeEntriesByNonceList(std::vector<const uint32_t> *nonceList);
-
-    /** \brief removes entry from IFNT by nonce and destination area
-     *  \param nonce a uint32_t with the nonce value
-     *  \param da a string with the destination area value
-     *  \return true for success
-     */
-    bool
-    removeEntryByNonceAndDA(const uint32_t nonce, const uint32_t da);
-
-    /** \brief removes entries from IFNT by nonce list and destination area
-     *  \param nonce a pointer for a list of nonces
-     *  \param da a string with the destination area value
-     *  \return true for success
-     */
-    bool
-    removeEntriesByNonceListAndDA(std::vector<const uint32_t> *nonceList, const uint32_t da);
+    void
+    removeEntriesByNonceList(std::vector<uint32_t> *nonceList)
+    {
+        for(uint32_t nonce : *nonceList) {
+            removeEntryByNonce(nonce);
+        }
+    }
 
     /** \brief finds an entry in IFNT
      *  \param entry a reference to the IFNT entry to match
      *  \return pair in which the first member is a shared pointer to the entry
      *          and the second is a boolean refleting the succes of the operation 
      */
-    std::pair<std::shared_ptr<const Entry>, bool>
+    std::pair<bool, std::shared_ptr<const Entry>>
     findMatch(const Entry& entry);
 
     /** \brief find an entry in IFNT by nonce
@@ -100,7 +88,7 @@ public:
      *  \return pair in which the first member is a shared pointer to the entry
      *          and the second is a boolean refleting the succes of the operation
      */
-    std::pair<std::shared_ptr<const Entry>, bool>
+    std::pair<bool, std::shared_ptr<const Entry>>
     findMatchByNonce(const uint32_t nonce);
 
     /** \brief finds all the match in the IFNT given a list of nonces
@@ -109,30 +97,6 @@ public:
      */
     ListMatchResult
     findMatchByNonceList(std::vector<const uint32_t> *nonceList);
-
-    /** \brief finds all the match in the IFNT given a list of nonces and a destination area
-     *  \param nonce a uint32_t with the nonce value
-     *  \param da a string with the destination area information
-     *  \return pair in which the first member is a shared pointer to the entry
-     *          and the second is a boolean refleting the succes of the operation
-     */
-    std::pair<std::shared_ptr<const Entry>, bool>
-    findMatchByNonceAndDA(const uint32_t nonce, const uint32_t da);
-
-
-    /** \brief finds all the match in the IFNT given a list of nonces and a destination area
-     *  \param nonceList a pointer to the list of nonces
-     *  \param da a string with the destination area information
-     *  \return a list of INFT entries shared pointers
-     */
-    ListMatchResult
-    findMatchByNonceListandDA(std::vector<const uint32_t> *nonceList, const uint32_t da);
-
-    inline Table*
-    getTable()
-    {
-        return &m_table;
-    }
 
     inline size_t
     getIfntSize()

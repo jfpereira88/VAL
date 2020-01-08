@@ -44,32 +44,42 @@ namespace ifnt {
         return false;
     }
 
-    std::pair<std::shared_ptr<const Entry>, bool>
+    std::pair<bool, std::shared_ptr<const Entry>>
     Ifnt::findMatch(const Entry& entry)
     {
         std::list<std::unique_ptr<Entry>>::iterator it = m_table.begin();
         while (it != m_table.end())
         {
-            if (*it->get() == entry)
+            if (**it == entry)
                 break;
             it++;
         }
-        return std::make_pair(std::make_shared<const Entry>(entry), it != m_table.end()); //best if deleted on the caller
+        return std::make_pair(it != m_table.end(), std::make_shared<const Entry>(entry)); //best if deleted on the caller
        
     }
 
-    std::pair<std::shared_ptr<const Entry>, bool>
+    std::pair<bool, std::shared_ptr<const Entry>>
     Ifnt::findMatchByNonce(const uint32_t nonce)
     {
-        
         for (auto it = m_table.begin(); it != m_table.end(); it++) {
             if(it->get()->getNonce() == nonce)
-                return std::make_pair(std::make_shared<const Entry>(*it->get()), it != m_table.end());
+                return {it != m_table.end(), std::make_shared<const Entry>(**it)};
         }
-        return std::make_pair(nullptr, false);
+        return {false, nullptr};
     }
-
-
+/*
+    ListMatchResult
+    Ifnt::findMatchByNonceList(std::vector<const uint32_t> *nonceList)
+    {
+        ListMatchResult result;
+        for (uint32_t nonce : *nonceList) {
+            auto pair = findMatchByNonce(nonce);
+            if(pair.first)
+                result.push_back(pair.second);
+        }
+        return result;
+    }
+*/
 
 } // namespace ifnt
 } // namespcae val

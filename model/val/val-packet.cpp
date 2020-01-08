@@ -27,6 +27,7 @@ ValPacket::~ValPacket()
 {
 }
 
+
 void
 ValPacket::setInterest(std::shared_ptr<::ndn::Interest> interest)
 {

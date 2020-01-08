@@ -4,6 +4,7 @@
  */
 
 #include "val-pft-entry.hpp"
+#include "../val-packet.hpp"
 
 namespace ns3 {
 namespace ndn {
@@ -12,7 +13,7 @@ namespace pft {
 
 
 Entry::Entry(ValPacket&& valPkt)
-    : m_valPkt(std::make_unique<ValPacket>(valPkt))
+    : m_valPkt(std::make_shared<ValPacket>(valPkt))
     , m_state(Entry::WAITING_FORWARDING)
     , m_tries(Entry::FORWARDING_TRIES)
 {

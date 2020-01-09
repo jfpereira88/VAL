@@ -59,17 +59,17 @@ Dfnt::removeEntryBySignatureAndSA(::ndn::Signature sig, std::string sa)
     return false;
 }
 
-std::pair<bool, const Entry&>
+std::pair<bool, std::shared_ptr<const Entry>>
 Dfnt::findMatch(::ndn::Signature sig, std::string sa)
 {
     auto it = m_table.begin();
     while(it != m_table.end()) {
         if((*it)->getSignature() == sig && (*it)->getSA() == sa) {
-            return {true, **it};
+            return {true, std::make_shared<const Entry>(**it)};
         }
         it++;
     }
-    return {false, **it};
+    return {false,std::make_shared<const Entry>(**it)};
 }
 
 } // namespace dfnt

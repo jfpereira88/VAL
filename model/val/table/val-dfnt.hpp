@@ -41,7 +41,7 @@ public:
     bool
     removeEntryBySignatureAndSA(::ndn::Signature sig, std::string sa);
 
-    std::pair<bool, const Entry&>
+    std::pair<bool, std::shared_ptr<const Entry>>
     findMatch(::ndn::Signature sig, std::string sa);
 
     inline size_t

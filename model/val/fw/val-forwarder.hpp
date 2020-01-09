@@ -28,20 +28,27 @@ namespace ns3 {
 namespace ndn {
     class L3Protocol;
 namespace val {
+    class ValStrategy;
 
+using namespace ::ndn::literals::time_literals;
+//namespace time = ::ndn::time;
 
 class ValForwarder
 {
+friend class ValStrategy;
 
 public:
     ValForwarder(ndn::L3Protocol& l3P);
     ~ValForwarder();
-public:
+
     void
     reveiceInterest(const nfd::Face *inGeoface, const Interest& interest);
 
     void
     reveiceData(const nfd::Face *inGeoface, const Data& data, std::vector<const uint32_t> *nonceList, bool isProducer);
+
+    void
+    registerOutgoingValPacket(const nfd::FaceId outFaceId, const ValPacket& valPkt, time::milliseconds duration) const;
 
 private:
     void
@@ -84,6 +91,7 @@ private:
     dfnt::Dfnt m_dfnt;
     pft::PFT m_pft;
     f2a::F2A m_f2a;
+    ValStrategy *m_strategy;
     face::GeofaceFactory m_geofaceFactory;
     std::list<nfd::FaceId> m_networkFaces;
     // counters

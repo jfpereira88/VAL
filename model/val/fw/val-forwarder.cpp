@@ -4,6 +4,7 @@
  */
 
 #include "val-forwarder.hpp"
+#include "val-distances-strategy.hpp"
 #include "ns3/ndnSIM/model/ndn-l3-protocol.hpp"
 #include "ns3/log.h"
 
@@ -25,6 +26,7 @@ using ::ndn::Data;
 
 ValForwarder::ValForwarder(L3Protocol& l3P)
     : m_l3P(&l3P)
+    , m_strategy(new ValDistancesStrategy(*this))
     , m_geofaceFactory(*this)
     , m_invalidIN(0)
 {
@@ -56,6 +58,7 @@ ValForwarder::ValForwarder(L3Protocol& l3P)
 
 ValForwarder::~ValForwarder()
 {
+  delete m_strategy;
 }
 
 void
@@ -197,6 +200,11 @@ ValForwarder::reveiceInterest(const nfd::Face *inGeoface, const Interest& intere
 {
   NS_LOG_DEBUG(__func__);
   auto pair = m_ifnt.findMatchByNonce(interest.getNonce());
+  if(pair.first) { // relay node
+    m_strategy->afterIfntHit(inGeoface->getId(), pair.second, interest);
+  } else {  // generated locally
+    m_strategy->afterIfntMiss(inGeoface->getId(), interest);
+  }
   ValHeader valH;
   valH.setSA(interest.getName().toUri());
   valH.setDA(std::to_string(interest.getNonce()));
@@ -230,19 +238,6 @@ ValForwarder::reveiceInterest(const nfd::Face *inGeoface, const Interest& intere
       face->sendValPacket(std::move(valPkt)); 
     }
   }
-  
-  /*if(pair.second) {
-    Face* face = getNetworkFace(pair.first->getFaceId());
-    if(face != nullptr && face->isValNetFace()){
-      face->sendValPacket(std::move(valPkt)); 
-    }
-  } else { // Interest was generated locally
-    // first network face to be added
-    Face* face = getNetworkFace(*m_networkFaces.begin());
-    if(face != nullptr && face->isValNetFace()){
-      face->sendValPacket(std::move(valPkt)); 
-    }
-  }*/
 }
 
 void
@@ -260,7 +255,7 @@ ValForwarder::reveiceData(const nfd::Face *inGeoface, const Data& data, std::vec
     NS_LOG_DEBUG("Data from network");
     if(size > 1){
       // get a network face diferent from the incoming network face
-      Face* face = getOtherNetworkFace(entry.second.getFaceId());
+      Face* face = getOtherNetworkFace(entry.second->getFaceId());
       if(face != nullptr && face->isValNetFace()){
         face->sendValPacket(std::move(valPkt)); 
       }

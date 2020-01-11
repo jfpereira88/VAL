@@ -45,11 +45,11 @@ Dfnt::removeEntry(const Entry& entry)
 }
 
 bool
-Dfnt::removeEntryBySignatureAndSA(::ndn::Signature sig, std::string sa)
+Dfnt::removeEntryBySignature(::ndn::Signature sig)
 {
     auto it = m_table.begin();
     while(it != m_table.end()) {
-        if((*it)->getSignature() == sig && (*it)->getSA() == sa) {
+        if((*it)->getSignature() == sig) {
             m_table.erase(it);
             m_nItens--;
             return true;
@@ -60,11 +60,11 @@ Dfnt::removeEntryBySignatureAndSA(::ndn::Signature sig, std::string sa)
 }
 
 std::pair<bool, std::shared_ptr<const Entry>>
-Dfnt::findMatch(::ndn::Signature sig, std::string sa)
+Dfnt::findMatch(::ndn::Signature sig)
 {
     auto it = m_table.begin();
     while(it != m_table.end()) {
-        if((*it)->getSignature() == sig && (*it)->getSA() == sa) {
+        if((*it)->getSignature() == sig) {
             return {true, std::make_shared<const Entry>(**it)};
         }
         it++;

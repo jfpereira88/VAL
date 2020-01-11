@@ -96,7 +96,7 @@ public:
      *  \return a list of INFT entries shared pointers
      */
     ListMatchResult
-    findMatchByNonceList(std::vector<const uint32_t> *nonceList);
+    findMatchByNonceList(std::vector<uint32_t> *nonceList);
 
     inline size_t
     getIfntSize()

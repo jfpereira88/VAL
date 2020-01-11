@@ -21,9 +21,9 @@ using ::ndn::Block;
  */
 class ValHeader
 {
-static const uint8_t MAXHOPS = 9;
-
 public:
+  static constexpr uint8_t MAXHOPS = 9;
+
   class Error : public ::ndn::tlv::Error
   {
   public:

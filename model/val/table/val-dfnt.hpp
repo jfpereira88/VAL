@@ -39,10 +39,10 @@ public:
     removeEntry(const Entry& entry);
 
     bool
-    removeEntryBySignatureAndSA(::ndn::Signature sig, std::string sa);
+    removeEntryBySignature(::ndn::Signature sig);
 
     std::pair<bool, std::shared_ptr<const Entry>>
-    findMatch(::ndn::Signature sig, std::string sa);
+    findMatch(::ndn::Signature sig);
 
     inline size_t
     getDfntSize()

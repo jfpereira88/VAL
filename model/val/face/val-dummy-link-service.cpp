@@ -22,7 +22,7 @@ ValDummyLinkService::~ValDummyLinkService()
 }
 
 void
-ValDummyLinkService::doSendDataToVal(const Data& data, std::vector<const uint32_t> *nonceList, bool isProducer)
+ValDummyLinkService::doSendDataToVal(const Data& data, std::vector<uint32_t> *nonceList, bool isProducer)
 {
     BOOST_ASSERT(m_valFwd != nullptr);
     NS_LOG_DEBUG("Sending Data to ValFwd " << data.getName() << 

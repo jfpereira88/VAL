@@ -12,10 +12,11 @@ namespace val {
 namespace pft {
 
 
-Entry::Entry(ValPacket&& valPkt)
+Entry::Entry(ValPacket&& valPkt, uint64_t faceId)
     : m_valPkt(std::make_shared<ValPacket>(valPkt))
     , m_state(Entry::WAITING_FORWARDING)
     , m_tries(Entry::FORWARDING_TRIES)
+    , m_faceId(faceId)
 {
 }
 
@@ -39,6 +40,12 @@ const int
 Entry::getNumberOfTries() const 
 {
     return m_tries;
+}
+
+const uint64_t
+Entry::getFaceId() const 
+{
+    return m_faceId;
 }
 
 const ::nfd::scheduler::EventId

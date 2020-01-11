@@ -71,9 +71,9 @@ namespace ifnt {
         }
         return {false, nullptr};
     }
-/*
+
     ListMatchResult
-    Ifnt::findMatchByNonceList(std::vector<const uint32_t> *nonceList)
+    Ifnt::findMatchByNonceList(std::vector<uint32_t> *nonceList)
     {
         ListMatchResult result;
         for (uint32_t nonce : *nonceList) {
@@ -83,7 +83,7 @@ namespace ifnt {
         }
         return result;
     }
-*/
+
 
 } // namespace ifnt
 } // namespcae val

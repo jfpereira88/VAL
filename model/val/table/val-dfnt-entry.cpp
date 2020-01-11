@@ -16,7 +16,7 @@ Entry::Entry(const ValHeader& valHeader, const ::ndn::Data& data, uint64_t faceI
     , m_da(valHeader.getDA())
     , m_sig(data.getSignature())
     , m_phPos(valHeader.getPhPos())
-    , m_hopC(valHeader.getHopC())
+    , m_hopC(valHeader.getHopC() - 1)
     , m_rn(valHeader.getRN())
     , m_faceId(faceId)
 {

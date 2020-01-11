@@ -45,10 +45,10 @@ public:
     reveiceInterest(const nfd::Face *inGeoface, const Interest& interest);
 
     void
-    reveiceData(const nfd::Face *inGeoface, const Data& data, std::vector<const uint32_t> *nonceList, bool isProducer);
+    reveiceData(const nfd::Face *inGeoface, const Data& data, std::vector<uint32_t> *nonceList, bool isProducer);
 
     void
-    registerOutgoingValPacket(const nfd::FaceId outFaceId, const ValPacket& valPkt, time::milliseconds duration) const;
+    registerOutgoingValPacket(const nfd::FaceId outFaceId, ValPacket& valPkt, time::milliseconds duration);
 
 private:
     void
@@ -83,6 +83,12 @@ private:
     // received Interest from network path
     bool
     isEscapedPacket(const ValHeader& valH);
+
+    void
+    forwardingTimerCallback(const std::shared_ptr<pft::Entry>& pftEntry, const nfd::FaceId outFaceId);
+
+    void
+    impAckTimerCallback(const std::shared_ptr<pft::Entry>& pftEntry, const nfd::FaceId outFaceId);
 
 private:
     ndn::L3Protocol *m_l3P; // add faces via this pointer

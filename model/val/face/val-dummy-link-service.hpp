@@ -39,7 +39,7 @@ private:
     doReceivePacket(Transport::Packet&& packet) override;
 
     void
-    doSendDataToVal(const Data& data, std::vector<const uint32_t> *nonceList, bool isProcucer) override;
+    doSendDataToVal(const Data& data, std::vector<uint32_t> *nonceList, bool isProcucer) override;
 
     void
     doSendInterestToVal(const Interest& interest) override;

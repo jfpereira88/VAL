@@ -14,7 +14,8 @@ namespace val {
 class ValPacket;
 namespace pft {
 
-using Table = std::list<std::unique_ptr<Entry>>; 
+using Table = std::list<std::unique_ptr<Entry>>;
+using ListMatchResult = std::vector<std::shared_ptr<const Entry>>;
 
 class PFT
 {
@@ -23,11 +24,14 @@ public:
     PFT(/* args */);
     ~PFT();
 
-    std::pair<bool, Entry&>
-    addEntry(ValPacket&& valPkt);
+    std::pair<bool, std::shared_ptr<pft::Entry>>
+    addEntry(ValPacket&& valPkt, uint64_t faceId);
 
-    std::pair<bool, Entry&>
+    std::pair<bool, std::shared_ptr<pft::Entry>>
     findMatch(const ValPacket& valPkt);
+
+    ListMatchResult
+    findMatchByNonceList(std::vector<uint32_t> *nonceList);
 
     bool
     removeEntry(const ValPacket& valPkt);

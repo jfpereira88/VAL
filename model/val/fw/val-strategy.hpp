@@ -33,20 +33,20 @@ public:
     }
 
     void
-    afterDfntHit(uint64_t faceId, const std::shared_ptr<const dfnt::Entry>& dfntEntry, const ndn::Data& data)
+    afterDfntHit(uint64_t faceId, const std::shared_ptr<const dfnt::Entry>& dfntEntry, ifnt::ListMatchResult* ifntEntries ,const ndn::Data& data)
     {
-        this->doAfterDfntHit(faceId, dfntEntry, data);
+        this->doAfterDfntHit(faceId, dfntEntry, ifntEntries, data);
     }
 
     void
-    afterDfntMiss(uint64_t faceId, const ndn::Data& data, bool isProducer)
+    afterDfntMiss(uint64_t faceId, const ndn::Data& data, ifnt::ListMatchResult* ifntEntries, bool isProducer)
     {
-        this->doAfterDfntMiss(faceId, data, isProducer);
+        this->doAfterDfntMiss(faceId, data, ifntEntries, isProducer);
     }
 
 protected:
     void
-    sendValPacket(const uint64_t outFaceId, const ValPacket& valPkt, time::milliseconds duration)
+    sendValPacket(const uint64_t outFaceId, ValPacket& valPkt, time::milliseconds duration)
     {
         m_valFwd.registerOutgoingValPacket(outFaceId, valPkt, duration);
     }
@@ -67,6 +67,13 @@ protected:
         return "0";
     }
 
+    u_int64_t
+    getValNetFaceId()
+    {
+        auto it = m_valFwd.m_networkFaces.begin();
+        return *it;
+    }
+
     virtual void
     doAfterIfntHit(uint64_t faceId, const std::shared_ptr<const ifnt::Entry>& ifntEntry, const ndn::Interest& interest) = 0;
 
@@ -74,10 +81,15 @@ protected:
     doAfterIfntMiss(uint64_t faceId, const ndn::Interest& interest) = 0;
 
     virtual void
-    doAfterDfntHit(uint64_t faceId, const std::shared_ptr<const dfnt::Entry>& dfntEntry, const ndn::Data& data) = 0;
+    doAfterDfntHit(uint64_t faceId, const std::shared_ptr<const dfnt::Entry>& dfntEntry, ifnt::ListMatchResult* ifntEntries, const ndn::Data& data) = 0;
 
     virtual void
-    doAfterDfntMiss(uint64_t faceId, const ndn::Data& data, bool isProducer) = 0;
+    doAfterDfntMiss(uint64_t faceId, const ndn::Data& data, ifnt::ListMatchResult* ifntEntries, bool isProducer) = 0;
+
+protected:
+    const time::milliseconds DEFAULT_INTEREST_WAIT = 50_ms;
+    const time::milliseconds DEFAULT_DATA_WAIT = 10_ms;
+    const time::milliseconds ZERO_WAIT = 0_ms;
 
 private:
     ValForwarder& m_valFwd;

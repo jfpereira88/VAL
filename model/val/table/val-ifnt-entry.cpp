@@ -16,7 +16,7 @@ Entry::Entry(const ValHeader& valHeader, const ::ndn::Interest& interest, uint64
     , m_sa(valHeader.getSA())
     , m_nonce(interest.getNonce())
     , m_phPos(valHeader.getPhPos())
-    , m_hopC(valHeader.getHopC())
+    , m_hopC(valHeader.getHopC() - 1)
     , m_rn(valHeader.getRN())
     , m_faceId(faceId)
 {

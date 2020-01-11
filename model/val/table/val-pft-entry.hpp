@@ -32,7 +32,7 @@ public:
     // static const time::milliseconds m_IMPLICIT_ACK_TIME = 100_ms;
 
 public:
-    Entry(ValPacket&& valPkt);
+    Entry(ValPacket&& valPkt, uint64_t faceId);
     ~Entry();
 
     // gets
@@ -44,6 +44,9 @@ public:
 
     const int
     getNumberOfTries() const;
+
+    const uint64_t
+    getFaceId() const;
 
     const ::nfd::scheduler::EventId
     getTimerId() const;
@@ -65,6 +68,7 @@ private:
     std::shared_ptr<ValPacket> m_valPkt;
     int m_state;
     int m_tries;
+    uint64_t m_faceId;
     ::nfd::scheduler::EventId m_timerId;
     // this should be static, but it complains
     const time::milliseconds m_IMPLICIT_ACK_TIME = 100_ms;

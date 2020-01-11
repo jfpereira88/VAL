@@ -107,27 +107,27 @@ ValForwarder::preProcessingValPacket(const Face& face, const ValPacket& valP)
   auto pair = m_pft.findMatch(valP);
   if(pair.first) {  // match found
     // checking the pft entry state
-    if(pair.second.getState() == pft::Entry::WAITING_FORWARDING) { // a node in a better position made a broadcast
-      if(pair.second.getValPacket().getValHeader().getHopC() == valP.getValHeader().getHopC()) {
-        ::nfd::scheduler::cancel(pair.second.getTimerId()); // cancelling the forwarding timer
+    if(pair.second->getState() == pft::Entry::WAITING_FORWARDING) { // a node in a better position made a broadcast
+      if(pair.second->getValPacket().getValHeader().getHopC() == valP.getValHeader().getHopC()) {
+        ::nfd::scheduler::cancel(pair.second->getTimerId()); // cancelling the forwarding timer
         NS_LOG_DEBUG("Forwarding cancel due to broadcast of a node in a better position");
         m_pft.removeEntry(valP);
       } else {
         NS_LOG_DEBUG("Forwarding not cancel due to difference in the hop count. Received: " <<
                       std::to_string(valP.getValHeader().getHopC()) << " in PFT: " <<
-                      std::to_string(pair.second.getValPacket().getValHeader().getHopC()));
+                      std::to_string(pair.second->getValPacket().getValHeader().getHopC()));
       }
     }
-    if(pair.second.getState() == pft::Entry::WAITING_IMPLICIT_ACK) {
+    if(pair.second->getState() == pft::Entry::WAITING_IMPLICIT_ACK) {
       // for implicit ACK the hop count is less one than the one in PFT
-      if(pair.second.getValPacket().getValHeader().getHopC() - 1 == valP.getValHeader().getHopC()) {
-        ::nfd::scheduler::cancel(pair.second.getTimerId()); // cancelling the forwarding timer
+      if(pair.second->getValPacket().getValHeader().getHopC() - 1 == valP.getValHeader().getHopC()) {
+        ::nfd::scheduler::cancel(pair.second->getTimerId()); // cancelling the forwarding timer
         NS_LOG_DEBUG("Implicit ACK received, retransmission canceled");
         m_pft.removeEntry(valP);
       } else {
         NS_LOG_DEBUG("Implicit ACK not cancel due to difference in the hop count. Received: " <<
                       std::to_string(valP.getValHeader().getHopC()) << " in PFT: " <<
-                      std::to_string(pair.second.getValPacket().getValHeader().getHopC()));
+                      std::to_string(pair.second->getValPacket().getValHeader().getHopC()));
       }
     }
   }
@@ -161,6 +161,7 @@ ValForwarder::processInterestFromNetwork(const Face& face, const ValHeader& valH
       nfd::Face* geoface = m_faceTable->get(pair.second.getFaceId()); // get geoface
       geoface->sendInterestToForwarder(std::move(interest)); // send via geoface
     } else { // no geoface for the destination area - lets create one
+      // @TODO: also create face for source area
       // creating geoface
       auto geoface = m_geofaceFactory.makeGeoface();
       // adding geoface to faceTable
@@ -184,7 +185,8 @@ ValForwarder::processDataFromNetwork(const Face& face, const ValHeader& valH, co
   if(pair.first) { // match
     nfd::Face* geoface = m_faceTable->get(pair.second.getFaceId()); // get geoface
     geoface->sendDataToForwarder(std::move(data)); // send via geoface
-  } else { // no geoface for the destination area - lets create one
+  } else { // no geoface for the source area - lets create one
+    // @TODO: also create face for destination area
     // creating geoface
     auto geoface = m_geofaceFactory.makeGeoface();
     // adding geoface to faceTable
@@ -201,82 +203,84 @@ ValForwarder::reveiceInterest(const nfd::Face *inGeoface, const Interest& intere
   NS_LOG_DEBUG(__func__);
   auto pair = m_ifnt.findMatchByNonce(interest.getNonce());
   if(pair.first) { // relay node
+    NS_LOG_DEBUG("Interest from network");
     m_strategy->afterIfntHit(inGeoface->getId(), pair.second, interest);
   } else {  // generated locally
+    NS_LOG_DEBUG("Interest generated locally");
     m_strategy->afterIfntMiss(inGeoface->getId(), interest);
   }
-  ValHeader valH;
-  valH.setSA(interest.getName().toUri());
-  valH.setDA(std::to_string(interest.getNonce()));
-  ValPacket valPkt(valH);
-  valPkt.setInterest(std::make_shared<Interest>(interest));
-  size_t size = m_networkFaces.size();
-  NS_LOG_DEBUG("size of NetworkFaces Table: "<< size);
-  if (pair.second) {
-    NS_LOG_DEBUG("Interest from network");
-    if(size > 1){
-      // get a network face diferent from the incoming network face
-      Face* face = getOtherNetworkFace(pair.second->getFaceId());
-      if(face != nullptr && face->isValNetFace()){
-        NS_LOG_DEBUG("Send Valpkt to ValNetFace, "<< face->getId() << "incomming Face " << pair.second->getFaceId());
-        face->sendValPacket(std::move(valPkt)); 
-      }
-    } else {
-      Face* face = getNetworkFace(*m_networkFaces.begin());
-      if(face != nullptr && face->isValNetFace()){
-        face->sendValPacket(std::move(valPkt)); 
-      }
+}
+
+void
+ValForwarder::reveiceData(const nfd::Face *inGeoface, const Data& data, std::vector<uint32_t> *nonceList, bool isProducer)
+{
+  NS_LOG_DEBUG(__func__);
+  // get ifnt entries
+  ifnt::ListMatchResult ifntEntriesList = m_ifnt.findMatchByNonceList(nonceList);
+  m_ifnt.removeEntriesByNonceList(nonceList);
+  auto pair = m_dfnt.findMatch(data.getSignature());
+  if(pair.first) { // relay node
+    NS_LOG_DEBUG("Data from network");
+    // check agains PFT for cancelling retransmission of pending Interests
+    // Data can serve as an Implicit ACK or even as Interest Forwarding cancelation
+    pft::ListMatchResult pendingInterests = m_pft.findMatchByNonceList(nonceList);
+    for(auto it = pendingInterests.begin(); it != pendingInterests.end(); it++) {
+      ::nfd::scheduler::cancel((*it)->getTimerId());
     }
-  } else {
-    NS_LOG_DEBUG("Interest generated locally");
-    Face* face = getNetworkFace(*m_networkFaces.begin());
-    if(face == nullptr)
-      NS_LOG_DEBUG("NetValFace is null");
-    NS_LOG_DEBUG("isValNetFace? "<< std::boolalpha << face->isValNetFace());
-    if(face != nullptr && face->isValNetFace()){
-      NS_LOG_DEBUG("Send Valpkt to ValNetFace, "<< face->getId());
-      face->sendValPacket(std::move(valPkt)); 
+    m_strategy->afterDfntHit(inGeoface->getId(), pair.second, &ifntEntriesList, data);
+    m_dfnt.removeEntry(*pair.second); // this may cause trouble
+  } else {  // generated locally
+    NS_LOG_DEBUG("Data generated locally");
+    m_strategy->afterDfntMiss(inGeoface->getId(), data, &ifntEntriesList, isProducer);
+  }
+}
+
+void
+ValForwarder::registerOutgoingValPacket(const nfd::FaceId outFaceId, ValPacket& valPkt, time::milliseconds duration)
+{
+  // creates pft entry and schedules the forwarding events
+  auto pair = m_pft.addEntry(std::move(valPkt), outFaceId);
+  if(pair.first) {   // created
+    pair.second->setTimer(::nfd::scheduler::schedule(duration, [=] { forwardingTimerCallback(pair.second, outFaceId); }));
+  } else {    // not created but found one
+    NS_LOG_DEBUG("this should not happen!!");
+  }
+}
+
+void
+ValForwarder::forwardingTimerCallback(const std::shared_ptr<pft::Entry>& pftEntry, const nfd::FaceId outFaceId)
+{
+  if(pftEntry->getState() == pft::Entry::WAITING_FORWARDING) {
+    Face* outFace = m_faceTable->get(outFaceId);
+    if(outFace->isValNetFace()) {
+      outFace->sendValPacket(pftEntry->getValPacket());
+      // setting ImpAck timer
+      pftEntry->changeStateToWaintingImpAck();  // changing state
+      pftEntry->setTimer(::nfd::scheduler::schedule(pftEntry->getDefaultImpAckTimerDuration(), [=] { impAckTimerCallback(pftEntry, outFaceId); }));
+    } else {
+      NS_LOG_DEBUG("NOT ValNetFace: this should never happen!!");
     }
   }
 }
 
 void
-ValForwarder::reveiceData(const nfd::Face *inGeoface, const Data& data, std::vector<const uint32_t> *nonceList, bool isProducer)
+ValForwarder::impAckTimerCallback(const std::shared_ptr<pft::Entry>& pftEntry, const nfd::FaceId outFaceId)
 {
-  NS_LOG_DEBUG(__func__);
-  ValHeader valHeader;
-  valHeader.setRN(data.getName().toUri());
-  valHeader.setPhPos(std::to_string(data.getSignature().getType()));
-  ValPacket valPkt(valHeader);
-  valPkt.setData(std::make_shared<Data>(data));
-  auto entry = m_dfnt.findMatch(data.getSignature(), 0);
-  size_t size = m_networkFaces.size();
-  if(entry.first) {
-    NS_LOG_DEBUG("Data from network");
-    if(size > 1){
-      // get a network face diferent from the incoming network face
-      Face* face = getOtherNetworkFace(entry.second->getFaceId());
-      if(face != nullptr && face->isValNetFace()){
-        face->sendValPacket(std::move(valPkt)); 
+  if(pftEntry->getState() == pft::Entry::WAITING_IMPLICIT_ACK) {
+    Face* outFace = m_faceTable->get(outFaceId);
+    if(outFace->isValNetFace()) {
+      outFace->sendValPacket(pftEntry->getValPacket());
+      // setting ImpAck timer
+      pftEntry->oneLessTry();
+      if(pftEntry->getNumberOfTries() > 0) {
+        pftEntry->setTimer(::nfd::scheduler::schedule(pftEntry->getDefaultImpAckTimerDuration(), [=] { impAckTimerCallback(pftEntry, outFaceId); }));
+      } else {
+        m_pft.removeEntry(pftEntry->getValPacket());
       }
     } else {
-      Face* face = getNetworkFace(*m_networkFaces.begin());
-      if(face != nullptr && face->isValNetFace()){
-        face->sendValPacket(std::move(valPkt)); 
-      }
-    }
-  } else {
-    NS_LOG_DEBUG("Data generated locally");
-    Face* face = getNetworkFace(*m_networkFaces.begin());
-    if(face != nullptr && face->isValNetFace()){
-      face->sendValPacket(std::move(valPkt)); 
+      NS_LOG_DEBUG("NOT ValNetFace: this should never happen!!");
     }
   }
-  /*
-  Face* face = getNetworkFace(*m_networkFaces.begin());
-  if(face != nullptr && face->isValNetFace()){
-    face->sendValPacket(std::move(valPkt)); 
-  }*/
 }
 
 void

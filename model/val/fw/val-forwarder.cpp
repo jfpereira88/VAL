@@ -53,7 +53,7 @@ ValForwarder::ValForwarder(L3Protocol& l3P)
     nfd::fib::Entry* entry = m_l3P->getForwarder()->getFib().insert("/").first;
     entry->addOrUpdateNextHop(*floodFace, 0, 1);
     f2a::Entry floodFaceEntry(floodFace->getId(), "0");  // this can only be made after adding face to face table
-    m_f2a.addEntry(std::move(floodFaceEntry));
+    m_f2a.addEntry(floodFaceEntry);
 }
 
 ValForwarder::~ValForwarder()
@@ -158,7 +158,7 @@ ValForwarder::processInterestFromNetwork(const Face& face, const ValHeader& valH
     // get or create geoface
     auto pair = m_f2a.findByGeoArea(valH.getDA());
     if(pair.first) { // match
-      nfd::Face* geoface = m_faceTable->get(pair.second.getFaceId()); // get geoface
+      nfd::Face* geoface = m_faceTable->get(pair.second->getFaceId()); // get geoface
       geoface->sendInterestToForwarder(std::move(interest)); // send via geoface
     } else { // no geoface for the destination area - lets create one
       // @TODO: also create face for source area
@@ -180,10 +180,10 @@ ValForwarder::processDataFromNetwork(const Face& face, const ValHeader& valH, co
 {
   NS_LOG_DEBUG(__func__);
   dfnt::Entry entry(valH, data, face.getId());
-  m_dfnt.addEntry(std::move(entry));  // adding to data from network table
+  m_dfnt.addEntry(entry);  // adding to data from network table
   auto pair = m_f2a.findByGeoArea(valH.getSA());
   if(pair.first) { // match
-    nfd::Face* geoface = m_faceTable->get(pair.second.getFaceId()); // get geoface
+    nfd::Face* geoface = m_faceTable->get(pair.second->getFaceId()); // get geoface
     geoface->sendDataToForwarder(std::move(data)); // send via geoface
   } else { // no geoface for the source area - lets create one
     // @TODO: also create face for destination area
@@ -239,7 +239,8 @@ void
 ValForwarder::registerOutgoingValPacket(const nfd::FaceId outFaceId, ValPacket& valPkt, time::milliseconds duration)
 {
   // creates pft entry and schedules the forwarding events
-  auto pair = m_pft.addEntry(std::move(valPkt), outFaceId);
+  pft::Entry pftEntry(std::move(valPkt), outFaceId);
+  auto pair = m_pft.addEntry(pftEntry);
   if(pair.first) {   // created
     pair.second->setTimer(::nfd::scheduler::schedule(duration, [=] { forwardingTimerCallback(pair.second, outFaceId); }));
   } else {    // not created but found one

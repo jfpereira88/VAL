@@ -25,7 +25,7 @@ namespace ifnt {
     {
         auto pair = findMatch(entry);
         if(!pair.first) {
-            m_table.push_back(std::make_unique<Entry>(std::move(entry)));
+            m_table.push_back(std::make_shared<Entry>(entry));
             m_nItens++;
         }
         return !pair.first;
@@ -34,7 +34,7 @@ namespace ifnt {
     bool 
     Ifnt::removeEntry(const Entry& entry)
     {
-        std::list<std::unique_ptr<Entry>>::iterator it = m_table.begin();
+        auto it = m_table.begin();
         while (it != m_table.end())
         {
             if (*it->get() == entry)
@@ -48,26 +48,24 @@ namespace ifnt {
         return false;
     }
 
-    std::pair<bool, std::shared_ptr<const Entry>>
+    std::pair<bool, std::shared_ptr<Entry>>
     Ifnt::findMatch(const Entry& entry)
     {
-        std::list<std::unique_ptr<Entry>>::iterator it = m_table.begin();
-        while (it != m_table.end())
-        {
+        auto it = m_table.begin();
+        while (it != m_table.end()) {
             if (**it == entry)
                 break;
             it++;
         }
-        return std::make_pair(it != m_table.end(), std::make_shared<const Entry>(entry)); //best if deleted on the caller
-       
+        return {it != m_table.end(), *it}; //best if deleted on the caller
     }
 
-    std::pair<bool, std::shared_ptr<const Entry>>
+    std::pair<bool, std::shared_ptr<Entry>>
     Ifnt::findMatchByNonce(const uint32_t nonce)
     {
         for (auto it = m_table.begin(); it != m_table.end(); it++) {
             if(it->get()->getNonce() == nonce)
-                return {it != m_table.end(), std::make_shared<const Entry>(**it)};
+                return {it != m_table.end(), *it};
         }
         return {false, nullptr};
     }

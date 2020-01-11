@@ -16,7 +16,7 @@ namespace ndn {
 namespace val {
 namespace dfnt {
 
-using Table = std::list<std::unique_ptr<Entry>>; 
+using Table = std::list<std::shared_ptr<Entry>>; 
 
 class Dfnt : boost::noncopyable
 {
@@ -29,7 +29,7 @@ public:
     *  \return true for success
     */
     void
-    addEntry(Entry&& entry);
+    addEntry(Entry& entry);
 
     /** \brief removes entry from DFNT
      *  \param entry a reference to the DFNT Entry to remove
@@ -41,7 +41,7 @@ public:
     bool
     removeEntryBySignature(::ndn::Signature sig);
 
-    std::pair<bool, std::shared_ptr<const Entry>>
+    std::pair<bool, std::shared_ptr<Entry>>
     findMatch(::ndn::Signature sig);
 
     inline size_t

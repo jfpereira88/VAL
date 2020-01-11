@@ -25,8 +25,8 @@ namespace ndn {
 namespace val {
 namespace ifnt{
 
-using Table = std::list<std::unique_ptr<Entry>>;
-using ListMatchResult = std::vector<std::shared_ptr<const Entry>>;
+using Table = std::list<std::shared_ptr<Entry>>;
+using ListMatchResult = std::vector<std::shared_ptr<Entry>>;
 
 class Ifnt : boost::noncopyable
 {
@@ -80,7 +80,7 @@ public:
      *  \return pair in which the first member is a shared pointer to the entry
      *          and the second is a boolean refleting the succes of the operation 
      */
-    std::pair<bool, std::shared_ptr<const Entry>>
+    std::pair<bool, std::shared_ptr<Entry>>
     findMatch(const Entry& entry);
 
     /** \brief find an entry in IFNT by nonce
@@ -88,7 +88,7 @@ public:
      *  \return pair in which the first member is a shared pointer to the entry
      *          and the second is a boolean refleting the succes of the operation
      */
-    std::pair<bool, std::shared_ptr<const Entry>>
+    std::pair<bool, std::shared_ptr<Entry>>
     findMatchByNonce(const uint32_t nonce);
 
     /** \brief finds all the match in the IFNT given a list of nonces

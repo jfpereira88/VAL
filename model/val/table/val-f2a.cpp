@@ -21,10 +21,10 @@ F2A::~F2A()
 }
 
 void
-F2A::addEntry(Entry&& entry)
+F2A::addEntry(Entry& entry)
 {
     if(!findEntry(entry)) {
-        m_f2a.push_back(std::make_unique<Entry>(entry));
+        m_f2a.push_back(std::make_shared<Entry>(entry));
         m_size++;
     }
 }
@@ -72,26 +72,26 @@ F2A::findEntry(Entry& entry)
     return false;
 }
 
-std::pair<bool, const Entry&>
+std::pair<bool, std::shared_ptr<Entry>>
 F2A::findByFaceId(uint64_t faceId)
 {
     auto it = m_f2a.begin();
     for( ; it != m_f2a.end(); it++) {
         if((*it)->getFaceId() == faceId)
-            return {true, **it};
+            return {true, *it};
     }
-    return {false, **it};
+    return {false, *it};
 }
 
-std::pair<bool, const Entry&>
+std::pair<bool, std::shared_ptr<Entry>>
 F2A::findByGeoArea(std::string geoArea)
 {
     auto it = m_f2a.begin();
     for( ; it != m_f2a.end(); it++) {
         if((*it)->getGeoArea() == geoArea)
-            return {true, **it};
+            return {true, *it};
     }
-    return {false, **it};
+    return {false, *it};
 }
 
 const size_t

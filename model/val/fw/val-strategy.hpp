@@ -62,7 +62,7 @@ protected:
     {
         auto pair = m_valFwd.m_f2a.findByFaceId(faceId);
         if(pair.first) {
-            return pair.second.getGeoArea();
+            return pair.second->getGeoArea();
         }
         return "0";
     }

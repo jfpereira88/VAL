@@ -14,8 +14,8 @@ namespace val {
 class ValPacket;
 namespace pft {
 
-using Table = std::list<std::unique_ptr<Entry>>;
-using ListMatchResult = std::vector<std::shared_ptr<const Entry>>;
+using Table = std::list<std::shared_ptr<Entry>>;
+using ListMatchResult = std::vector<std::shared_ptr<Entry>>;
 
 class PFT
 {
@@ -24,10 +24,10 @@ public:
     PFT(/* args */);
     ~PFT();
 
-    std::pair<bool, std::shared_ptr<pft::Entry>>
-    addEntry(ValPacket&& valPkt, uint64_t faceId);
+    std::pair<bool, std::shared_ptr<Entry>>
+    addEntry(Entry& entry);
 
-    std::pair<bool, std::shared_ptr<pft::Entry>>
+    std::pair<bool, std::shared_ptr<Entry>>
     findMatch(const ValPacket& valPkt);
 
     ListMatchResult

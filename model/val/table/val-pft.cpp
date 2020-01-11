@@ -22,15 +22,15 @@ PFT::~PFT()
 }
 
 // add or find
-std::pair<bool, std::shared_ptr<pft::Entry>>
-PFT::addEntry(ValPacket&& valPkt, uint64_t faceId)
+std::pair<bool, std::shared_ptr<Entry>>
+PFT::addEntry(Entry& entry)
 {
-    auto found = findMatch(valPkt);
+    auto found = findMatch(entry.getValPacket());
     if(!found.first) {
-        Entry entry(std::move(valPkt), faceId);
-        m_pft.push_back(std::make_unique<Entry>(entry));
+        std::shared_ptr<Entry> ptr_entry = std::make_shared<Entry>(entry);
+        m_pft.push_back(ptr_entry);
         m_nItens++;
-        return {true, std::make_shared<Entry>(entry)};
+        return {true, ptr_entry};
     }
     found.first = false;
     return {false, found.second}; //found;
@@ -39,7 +39,7 @@ PFT::addEntry(ValPacket&& valPkt, uint64_t faceId)
 
 // it is equal if it has the same nonce, in the case of being an Interest Pkt
 // it is equal if it has the same signature, in the case of being a Data Pkt
-std::pair<bool, std::shared_ptr<pft::Entry>>
+std::pair<bool, std::shared_ptr<Entry>>
 PFT::findMatch(const ValPacket& valPkt)
 {
     auto it = m_pft.begin();
@@ -48,16 +48,16 @@ PFT::findMatch(const ValPacket& valPkt)
         if(valPkt.isSet() == (*it)->getValPacket().isSet()) {
             if(valPkt.isSet() == ValPacket::INTEREST_SET) {
                 if(valPkt.getInterest().getNonce() == (*it)->getValPacket().getInterest().getNonce()) {
-                    return {true, std::make_shared<Entry>(**it)};
+                    return {true, *it};
                 }
             } else if(valPkt.isSet() == ValPacket::DATA_SET) {
                 if(valPkt.getData().getSignature() == (*it)->getValPacket().getData().getSignature()){
-                    return {true, std::make_shared<Entry>(**it)};
+                    return {true, *it};
                 }
             }
         }
     }
-    return {false, std::make_shared<Entry>(**it)};
+    return {false, *it};
 }
 
 ListMatchResult
@@ -69,7 +69,7 @@ PFT::findMatchByNonceList(std::vector<uint32_t> *nonceList)
         if((*it)->getValPacket().isSet() == ValPacket::INTEREST_SET) {
             for(uint32_t nonce : *nonceList) {
                 if((*it)->getValPacket().getInterest().getNonce() == nonce) {
-                    res.push_back(std::make_shared<Entry>(**it));
+                    res.push_back(*it);
                     m_pft.erase(it);
                 }
             }

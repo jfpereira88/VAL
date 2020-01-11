@@ -17,7 +17,7 @@ namespace ndn {
 namespace val {
 namespace f2a {
 
-using Table = std::list<std::unique_ptr<Entry>>; 
+using Table = std::list<std::shared_ptr<Entry>>; 
 
 class F2A
 {
@@ -26,7 +26,7 @@ public:
     ~F2A();
 
     void
-    addEntry(Entry&& entry);
+    addEntry(Entry& entry);
 
     void
     removeEntry(Entry& entry);
@@ -40,10 +40,10 @@ public:
     const bool
     findEntry(Entry& entry);
 
-    std::pair<bool, const Entry&>
+    std::pair<bool, std::shared_ptr<Entry>>
     findByFaceId(uint64_t faceId);
 
-    std::pair<bool, const Entry&>
+    std::pair<bool, std::shared_ptr<Entry>>
     findByGeoArea(std::string geoArea);
 
     const size_t

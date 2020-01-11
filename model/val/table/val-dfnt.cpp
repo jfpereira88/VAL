@@ -21,20 +21,18 @@ Dfnt::~Dfnt()
 }
 
 void
-Dfnt::addEntry(Entry&& entry)
+Dfnt::addEntry(Entry& entry)
 {
-    m_table.push_back(std::make_unique<Entry>(entry));
+    m_table.push_back(std::make_shared<Entry>(entry));
     m_nItens++;
 }
 
 bool 
 Dfnt::removeEntry(const Entry& entry)
 {
-    std::list<std::unique_ptr<Entry>>::iterator it = m_table.begin();
-    while (it != m_table.end())
-    {
-        if (**it == entry)
-        {
+    auto it = m_table.begin();
+    while (it != m_table.end()) {
+        if (**it == entry) {
             m_table.erase(it);
             m_nItens--;
             return true;
@@ -59,17 +57,17 @@ Dfnt::removeEntryBySignature(::ndn::Signature sig)
     return false;
 }
 
-std::pair<bool, std::shared_ptr<const Entry>>
+std::pair<bool, std::shared_ptr<Entry>>
 Dfnt::findMatch(::ndn::Signature sig)
 {
     auto it = m_table.begin();
     while(it != m_table.end()) {
         if((*it)->getSignature() == sig) {
-            return {true, std::make_shared<const Entry>(**it)};
+            return {true, *it};
         }
         it++;
     }
-    return {false,std::make_shared<const Entry>(**it)};
+    return {false, *it};
 }
 
 } // namespace dfnt

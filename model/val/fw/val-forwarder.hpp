@@ -90,6 +90,12 @@ private:
     void
     impAckTimerCallback(const std::shared_ptr<pft::Entry>& pftEntry, const nfd::FaceId outFaceId);
 
+    /** \brief Make geofaces from ValHeader
+     * \return first FaceId_SA, second FaceID_DA
+     */
+    std::pair<uint32_t, uint32_t>
+    makeGeoFaceFromValHeader(const ValHeader& valH);
+
 private:
     ndn::L3Protocol *m_l3P; // add faces via this pointer
     nfd::FaceTable *m_faceTable;

@@ -127,7 +127,7 @@ ValDistancesStrategy::doAfterDfntMiss(uint64_t faceId, const ndn::Data& data, if
     if(isProducer) {
         srcArea = getMyArea();
     } else {
-        srcArea = this->getGeoArea(faceId);
+        srcArea = this->getGeoArea(faceId); 
     }
     ValHeader valH(srcArea, pair.second, 
                 getMyPos(), data.getName().toUri(), hopc);

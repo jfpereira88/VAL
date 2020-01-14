@@ -8,6 +8,8 @@
 #include "ns3/ndnSIM/model/ndn-l3-protocol.hpp"
 #include "ns3/log.h"
 
+#include <ndn-cxx/lp/tags.hpp>
+
 
 
 NS_LOG_COMPONENT_DEFINE("ndn.val.ValForwarder");
@@ -156,19 +158,14 @@ ValForwarder::processInterestFromNetwork(const Face& face, const ValHeader& valH
   ifnt::Entry entry(valH, interest, face.getId());
   if(m_ifnt.addEntry(entry)) {  // added - no equal match found
     // get or create geoface
-    auto pair = m_f2a.findByGeoArea(valH.getDA());
-    if(pair.first) { // match
-      nfd::Face* geoface = m_faceTable->get(pair.second->getFaceId()); // get geoface
-      geoface->sendInterestToForwarder(std::move(interest)); // send via geoface
-    } else { // no geoface for the destination area - lets create one
-      // @TODO: also create face for source area
-      // creating geoface
-      auto geoface = m_geofaceFactory.makeGeoface();
-      // adding geoface to faceTable
-      m_l3P->addFace(geoface); // only after added to face table does the face has ID 
-      // creating an Entry in F2A
-      f2a::Entry entry(geoface->getId(), valH.getDA());
-      geoface->sendInterestToForwarder(std::move(interest)); // send via geoface
+    auto geoFacesIds = makeGeoFaceFromValHeader(valH);
+    nfd::Face* geoface_SA = m_faceTable->get(geoFacesIds.first); // get geoface
+    if(valH.getDA() != "0")
+      interest.setTag(make_shared<lp::NextHopFaceIdTag>(geoFacesIds.second));
+    if(geoface_SA != nullptr) {
+      geoface_SA->sendInterestToForwarder(std::move(interest)); // send via geoface
+    } else {
+      NS_LOG_DEBUG("Geoface is nullptr!!");
     }
   } else { // not added already has one entry with the same information
     NS_LOG_DEBUG("THIS SHOULD NEVER HAPPEN!!");
@@ -181,19 +178,12 @@ ValForwarder::processDataFromNetwork(const Face& face, const ValHeader& valH, co
   NS_LOG_DEBUG(__func__);
   dfnt::Entry entry(valH, data, face.getId());
   m_dfnt.addEntry(entry);  // adding to data from network table
-  auto pair = m_f2a.findByGeoArea(valH.getSA());
-  if(pair.first) { // match
-    nfd::Face* geoface = m_faceTable->get(pair.second->getFaceId()); // get geoface
-    geoface->sendDataToForwarder(std::move(data)); // send via geoface
-  } else { // no geoface for the source area - lets create one
-    // @TODO: also create face for destination area
-    // creating geoface
-    auto geoface = m_geofaceFactory.makeGeoface();
-    // adding geoface to faceTable
-    m_l3P->addFace(geoface); // only after added to face table does the face has ID 
-    // creating an Entry in F2A
-    f2a::Entry entry(geoface->getId(), valH.getSA());
-    geoface->sendDataToForwarder(std::move(data)); // send via geoface
+  auto geoFacesIds = makeGeoFaceFromValHeader(valH);
+  nfd::Face* geoface_SA = m_faceTable->get(geoFacesIds.first); // get geoface
+  if(geoface_SA != nullptr) {
+    geoface_SA->sendDataToForwarder(std::move(data)); // send via geoface
+  } else {
+    NS_LOG_DEBUG("Geoface is nullptr!!");
   }
 }
 
@@ -284,6 +274,36 @@ ValForwarder::impAckTimerCallback(const std::shared_ptr<pft::Entry>& pftEntry, c
   }
 }
 
+std::pair<uint32_t, uint32_t>
+ValForwarder::makeGeoFaceFromValHeader(const ValHeader& valH)
+{
+  uint32_t faceID_SA = 0;
+  uint32_t faceID_DA = 0;
+
+  auto pair_SA = m_f2a.findByGeoArea(valH.getSA());
+  if(pair_SA.first) {
+    faceID_SA = pair_SA.second->getFaceId();
+  } else {
+    auto geoface_SA = m_geofaceFactory.makeGeoface();
+    m_l3P->addFace(geoface_SA);
+    faceID_SA = geoface_SA->getId();
+    f2a::Entry entry_SA(faceID_SA, valH.getSA());
+    m_f2a.addEntry(entry_SA);
+  }
+
+  auto pair_DA = m_f2a.findByGeoArea(valH.getDA());
+  if(pair_DA.first) {
+    faceID_DA = pair_DA.second->getFaceId();
+  } else {
+    auto geoface_DA = m_geofaceFactory.makeGeoface();
+    m_l3P->addFace(geoface_DA);
+    faceID_DA = geoface_DA->getId();
+    f2a::Entry entry_DA(faceID_DA, valH.getDA());
+    m_f2a.addEntry(entry_DA);
+  }
+
+  return {faceID_SA, faceID_DA};
+}
 void
 ValForwarder::cleanupOnFaceRemoval(const Face& face)
 {

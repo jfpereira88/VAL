@@ -128,10 +128,10 @@ void installWifi(NodeContainer &c, NetDeviceContainer &devices)
 void installNDN(NodeContainer &c)
 {
   ndn::StackHelper ndnHelper;
-  ndnHelper.SetDefaultRoutes(true);
+  ndnHelper.SetDefaultRoutes(false);
 
   ndnHelper.Install(c);
-  ndn::StrategyChoiceHelper::InstallAll("/", "/localhost/nfd/strategy/multicast");
+  ndn::StrategyChoiceHelper::InstallAll("/", "/localhost/nfd/strategy/broadcast");
 
   ///todo add v2v face
 

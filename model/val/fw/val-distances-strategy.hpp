@@ -14,10 +14,6 @@ namespace val {
 
 class ValDistancesStrategy : public ValStrategy
 {
-private:
-static constexpr uint16_t DELAY_IN_MICROS = 4000;
-static constexpr long int MAX_32WORD_RANDOM = 4294967296;
-
 public:
     ValDistancesStrategy(ValForwarder& valFwd);
     ~ValDistancesStrategy();
@@ -41,13 +37,13 @@ private:
     std::vector<std::string>
     getPositions(ifnt::ListMatchResult* ifntEntriesList);
 
-    uint32_t
+    double
     getMultiPointDist(const std::string pointA, std::vector<std::string> *pointsList);
 
-    uint32_t
+    double
     getDistanceToArea(const std::string pointA, const std::string area);
 
-    uint32_t
+    double
     getDistanceToPoint(const std::string pointA, const std::string pointB);
 
     std::string
@@ -57,16 +53,26 @@ private:
     getMyArea();
 
     time::milliseconds
-    calcFwdTimer(uint32_t dist);
+    calcFwdTimer(double dist, bool isData = false);
 
     time::milliseconds
-    calcInvertedFwdTimer(uint32_t dist);
+    calcInvertedFwdTimer(double dist, bool isData = false);
 
+    std::string
+    getAreaFromPosition(double _x, double _y);
+
+    ns3::Vector3D
+    getPositionFromArea(std::string area);
+
+    /**
+     *  \brief return the information of the interest that as done the longest jorney
+     *  \return first: hopc, second: sourceArea
+     */
     std::pair<uint32_t, std::string>
     getLongestJorney(ifnt::ListMatchResult* ifntEntriesList);
 
 private:
-    /* data */
+    Ptr<UniformRandomVariable> m_randomNum;
 };
 
 

@@ -57,6 +57,7 @@ StrategyChoiceHelper::Install(const NodeContainer& c, const Name& namePrefix, co
 void
 StrategyChoiceHelper::Install(Ptr<Node> node, const Name& namePrefix, const Name& strategy)
 {
+  NS_LOG_UNCOND ("so far so good after install");
   ControlParameters parameters;
   parameters.setName(namePrefix);
   NS_LOG_DEBUG("Node ID: " << node->GetId() << " with forwarding strategy " << strategy);

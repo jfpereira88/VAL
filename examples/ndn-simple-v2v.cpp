@@ -128,10 +128,14 @@ void installWifi(NodeContainer &c, NetDeviceContainer &devices)
 void installNDN(NodeContainer &c)
 {
   ndn::StackHelper ndnHelper;
+  
   ndnHelper.SetDefaultRoutes(false);
-
+  
   ndnHelper.Install(c);
+  NS_LOG_UNCOND ("so far so good after install");
   ndn::StrategyChoiceHelper::InstallAll("/", "/localhost/nfd/strategy/broadcast");
+  NS_LOG_UNCOND ("so far so good after strategy set");
+  
 
   ///todo add v2v face
 
@@ -161,8 +165,9 @@ void installProducer(NodeContainer &c)
 int main (int argc, char *argv[])
 {
   NS_LOG_UNCOND ("V2VTest Simulator");
+ 
 
-  uint32_t numProducer = 1;
+  //uint32_t numProducer = 1;
   int simulationEnd = 10;
 
   NodeContainer c;
@@ -172,12 +177,12 @@ int main (int argc, char *argv[])
 
   NetDeviceContainer netDevices;
   installWifi(c, netDevices);
-
+  
   installNDN(c);
-
+  
   //setting application
   Ptr<UniformRandomVariable> randomNum = CreateObject<UniformRandomVariable> ();
-  int producerId = randomNum->GetValue(0,numNodes-1);
+  uint32_t producerId = randomNum->GetValue(0,numNodes-1);
 
   NodeContainer producer;
   producer.Add(c.Get(producerId));

@@ -6,6 +6,7 @@
 #include "val-forwarder.hpp"
 #include "val-distances-strategy.hpp"
 #include "ns3/ndnSIM/model/ndn-l3-protocol.hpp"
+#include "ns3/ndnSIM/model/ndn-net-device-transport.hpp"
 #include "ns3/log.h"
 
 #include <ndn-cxx/lp/tags.hpp>
@@ -37,6 +38,7 @@ ValForwarder::ValForwarder(L3Protocol& l3P)
     m_faceTable->afterValFaceAdd.connect([this] (Face& face) {
       NS_LOG_DEBUG("Adding ValNetFace? "<< std::boolalpha << face.isValNetFace());
       addToNetworkFaceList(face);
+      m_strategy->setMobilityModel(dynamic_cast<ns3::ndn::NetDeviceTransport*>(face.getTransport())->GetNetDevice()->GetNode()->GetObject<WaypointMobilityModel>());
       face.afterReceiveValPkt.connect(
         [this, &face] (const ValPacket& valP) {
           onReceivedValPacket(face, valP);

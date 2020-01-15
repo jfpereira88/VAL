@@ -57,7 +57,9 @@ Entry::getTimerId() const
 const time::milliseconds
 Entry::getDefaultImpAckTimerDuration() const 
 {
-    return m_IMPLICIT_ACK_TIME;
+    if(m_valPkt->isSet() == ValPacket::DATA_SET)
+        return m_IMPLICIT_ACK_TIME_DATA;
+    return m_IMPLICIT_ACK_TIME_INTEREST;
 }
 
 bool

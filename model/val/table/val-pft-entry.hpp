@@ -71,7 +71,9 @@ private:
     uint64_t m_faceId;
     ::nfd::scheduler::EventId m_timerId;
     // this should be static, but it complains
-    const time::milliseconds m_IMPLICIT_ACK_TIME = 100_ms;
+    const time::milliseconds m_IMPLICIT_ACK_TIME_INTEREST = 81_ms;
+    const time::milliseconds m_IMPLICIT_ACK_TIME_DATA = 40_ms;
+
 };
 
 

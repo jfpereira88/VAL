@@ -4,6 +4,7 @@
 #include "ns3/network-module.h"
 #include "ns3/wifi-module.h"
 #include "ns3/random-variable-stream.h"
+#include "ns3/ndnSIM-module.h"
 #include "ns3/ndnSIM/apps/ndn-producer.hpp"
 #include "ns3/ndnSIM/apps/ndn-consumer-cbr.hpp"
 #include "ns3/ndnSIM/apps/ndn-app.hpp"
@@ -61,8 +62,8 @@ void installMobility(NodeContainer &c, int simulationEnd)
     Ptr<WaypointMobilityModel> wayMobility[numNodes];
     for (uint32_t i = 0; i < numNodes; i++) {
       wayMobility[i] = c.Get(i)->GetObject<WaypointMobilityModel>();
-      Waypoint waypointStart(Seconds(0), Vector3D(i*10, 0, 0));
-      Waypoint waypointEnd(Seconds(simulationEnd), Vector3D(i*10, 0, 0));
+      Waypoint waypointStart(Seconds(0), Vector3D(i*50, 0, 0));
+      Waypoint waypointEnd(Seconds(simulationEnd), Vector3D(i*50, 0, 0));
 
       wayMobility[i]->AddWaypoint(waypointStart);
       wayMobility[i]->AddWaypoint(waypointEnd);
@@ -107,7 +108,7 @@ void installWifi(NodeContainer &c, NetDeviceContainer &devices)
   YansWifiChannelHelper wifiChannel;
   wifiChannel.SetPropagationDelay("ns3::ConstantSpeedPropagationDelayModel");
   wifiChannel.AddPropagationLoss("ns3::RangePropagationLossModel",
-                                 "MaxRange", DoubleValue(19.0));
+                                 "MaxRange", DoubleValue(100.0));
   wifiChannel.AddPropagationLoss("ns3::NakagamiPropagationLossModel",
                                  "m0", DoubleValue(1.0),
                                  "m1", DoubleValue(1.0),
@@ -132,9 +133,7 @@ void installNDN(NodeContainer &c)
   ndnHelper.SetDefaultRoutes(false);
   
   ndnHelper.Install(c);
-  NS_LOG_UNCOND ("so far so good after install");
   ndn::StrategyChoiceHelper::InstallAll("/", "/localhost/nfd/strategy/broadcast");
-  NS_LOG_UNCOND ("so far so good after strategy set");
   
 
   ///todo add v2v face
@@ -146,10 +145,11 @@ void installConsumer(NodeContainer &c)
 {
   ndn::AppHelper helper("ns3::ndn::ConsumerCbr");
   helper.SetAttribute("Frequency", DoubleValue (1.0));
-  helper.SetAttribute("Randomize", StringValue("uniform"));
+  helper.SetAttribute("Randomize", StringValue("none"));
   helper.SetPrefix("/v2v/test");
 
   helper.Install(c);
+  NS_LOG_INFO("Consumer installed on node " << c.Get(0)->GetId());
 }
 
 void installProducer(NodeContainer &c)
@@ -181,33 +181,39 @@ int main (int argc, char *argv[])
   installNDN(c);
   
   //setting application
-  Ptr<UniformRandomVariable> randomNum = CreateObject<UniformRandomVariable> ();
-  uint32_t producerId = randomNum->GetValue(0,numNodes-1);
+  //Ptr<UniformRandomVariable> randomNum = CreateObject<UniformRandomVariable> ();
+  uint32_t producerId = 5;//randomNum->GetValue(0,numNodes-1);
+  uint32_t consumerId = 0;
 
   NodeContainer producer;
   producer.Add(c.Get(producerId));
 
   NodeContainer consumers;
+  consumers.Add(c.Get(consumerId));
+  /*
   for(uint32_t i=0; i<numNodes; i++){
     if(i!=producerId){
       consumers.Add(c.Get(i));
       break;//tmp
     }
-  }
+  }*/
 
   installConsumer(consumers);
   installProducer(producer);
 
 
 
-  for(uint32_t i=0; i<c.GetN(); i++){
+  /*for(uint32_t i=0; i<c.GetN(); i++){
     Simulator::Schedule(Seconds(1), &printPosition, c.Get(i)->GetObject<WaypointMobilityModel>());
-  }
+  }*/
 
   Simulator::Stop(Seconds(simulationEnd));
 
-  std::string animFile = "v2v-test.xml";
-  AnimationInterface anim(animFile);
+  //std::string animFile = "v2v-test.xml";
+  //AnimationInterface anim(animFile);
+
+  ndn::AppDelayTracer::InstallAll("app-delays-trace.txt");
+  ndn::L3RateTracer::InstallAll("rate-trace.txt", Seconds(1));
   Simulator::Run ();
   return 0;
 }

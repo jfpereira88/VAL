@@ -25,6 +25,7 @@ ValDistancesStrategy::ValDistancesStrategy(ValForwarder& valFwd)
     : ValStrategy(valFwd)
     , m_randomNum(CreateObject<UniformRandomVariable>())
 {
+    NS_LOG_DEBUG("Creating VALStrategy-Distances");
 }
 
 ValDistancesStrategy::~ValDistancesStrategy() = default;
@@ -32,6 +33,7 @@ ValDistancesStrategy::~ValDistancesStrategy() = default;
 void
 ValDistancesStrategy::doAfterIfntHit(uint64_t faceId, const std::shared_ptr<const ifnt::Entry>& ifntEntry, const ndn::Interest& interest)
 {
+    NS_LOG_DEBUG(__func__);
     if(ifntEntry->getHopC() == 0) {
         return; // drop packet
     }
@@ -48,16 +50,17 @@ ValDistancesStrategy::doAfterIfntHit(uint64_t faceId, const std::shared_ptr<cons
               ValPacket valP(valH);
               valP.setInterest(std::make_shared<Interest>(interest));
         //      calculate the duration of the forwarding timer, less distance less time
-              time::milliseconds time = calcFwdTimer(myDist);
+              time::nanoseconds time = calcFwdTimer(myDist, ifntEntry->getHopC(), true, false);
               sendValPacket(ifntEntry->getFaceId(), valP, time);
          } else {
-        //      drop packet   
+        //      drop packet
+            NS_LOG_DEBUG("my dist > prevHopDist " << std::to_string(myDist) << " > " << std::to_string(preHopDist)); 
          }
     } else {  // exploration phase
         // get distance betwwen the current node and the previous node
         uint32_t dist = getDistanceToPoint(ifntEntry->getPhPos(), getMyPos());
         // calculate the duration of the forwarding timer, more distance less time
-        time::milliseconds time = calcInvertedFwdTimer(dist);
+        time::nanoseconds time = calcInvertedFwdTimer(dist, 0, false, false);
         std::string destinationArea = this->getGeoArea(faceId);
         ValHeader valH(ifntEntry->getSA(), destinationArea, 
                 getMyPos(), ifntEntry->getRN(), ifntEntry->getHopC());
@@ -80,14 +83,14 @@ ValDistancesStrategy::doAfterIfntHit(uint64_t faceId, const std::shared_ptr<cons
 void
 ValDistancesStrategy::doAfterIfntMiss(uint64_t faceId, const ndn::Interest& interest)
 {
-    
+    NS_LOG_DEBUG(__func__);
     std::string destinationArea = this->getGeoArea(faceId);
     uint8_t hopC = ValHeader::MAXHOPS;
     time::milliseconds time = time::milliseconds{ValDistancesStrategy::ZERO_WAIT};
-    ValHeader valH(getMyArea(), destinationArea, 
-                getMyPos(), interest.getName().toUri(), hopC);
+    ValHeader valH(getMyArea(), destinationArea, getMyPos(), interest.getName().getPrefix(-1).toUri(), hopC);
     ValPacket valP(valH);
     valP.setInterest(std::make_shared<Interest>(interest));
+    NS_LOG_DEBUG("Sending Val Packet from Strategy");
     sendValPacket(getValNetFaceId(), valP, time);
     
     /*
@@ -105,6 +108,7 @@ ValDistancesStrategy::doAfterIfntMiss(uint64_t faceId, const ndn::Interest& inte
 void
 ValDistancesStrategy::doAfterDfntHit(uint64_t faceId, const std::shared_ptr<const dfnt::Entry>& dfntEntry, ifnt::ListMatchResult* ifntEntries, const ndn::Data& data)
 {
+    NS_LOG_DEBUG(__func__);
     if(dfntEntry->getHopC() == 0) {
         return; // drop packet
     }
@@ -112,13 +116,16 @@ ValDistancesStrategy::doAfterDfntHit(uint64_t faceId, const std::shared_ptr<cons
     uint32_t prevHopDist = getMultiPointDist(dfntEntry->getPhPos(), &nextHopsPosList);
     uint32_t myDist = getMultiPointDist(getMyPos(), &nextHopsPosList);
     if(myDist < prevHopDist) {
-        time::milliseconds time = calcFwdTimer(myDist, true);
+        time::nanoseconds time = calcFwdTimer(myDist, 0, false, true);
         ValHeader valH(dfntEntry->getSA(), dfntEntry->getDA(), 
                     getMyPos(), dfntEntry->getRN(), dfntEntry->getHopC());
         ValPacket valP(valH);
         valP.setData(std::make_shared<Data>(data));
         sendValPacket(dfntEntry->getFaceId(), valP, time);
         // @REMEMBER: Data Last hop does not receive ImpACK
+    } else {
+        NS_LOG_DEBUG("my dist > prevHopDist " << std::to_string(myDist) << " > " << std::to_string(prevHopDist)
+            << " ifntEntries size " << std::to_string(ifntEntries->size()));
     }
     // else drop packet
 }
@@ -126,6 +133,7 @@ ValDistancesStrategy::doAfterDfntHit(uint64_t faceId, const std::shared_ptr<cons
 void
 ValDistancesStrategy::doAfterDfntMiss(uint64_t faceId, const ndn::Data& data, ifnt::ListMatchResult* ifntEntries, bool isProducer)
 {
+    NS_LOG_DEBUG(__func__);
     auto pair = getLongestJorney(ifntEntries);
     uint8_t hopc = ValHeader::MAXHOPS - pair.first + 1; // one more hop for good luck
     std::string srcArea;
@@ -135,7 +143,7 @@ ValDistancesStrategy::doAfterDfntMiss(uint64_t faceId, const ndn::Data& data, if
         srcArea = this->getGeoArea(faceId); 
     }
     ValHeader valH(srcArea, pair.second, 
-                getMyPos(), data.getName().toUri(), hopc);
+                getMyPos(), data.getName().getPrefix(-1).toUri(), hopc);
     ValPacket valP(valH);
     valP.setData(std::make_shared<Data>(data));
     time::milliseconds time = time::milliseconds{ValDistancesStrategy::ZERO_WAIT};
@@ -143,13 +151,13 @@ ValDistancesStrategy::doAfterDfntMiss(uint64_t faceId, const ndn::Data& data, if
     // @REMEMBER: Data Last hop does not receive ImpACK
 }
 
-time::microseconds
+time::nanoseconds
 ValDistancesStrategy::generateMicroSecondDelay()
 {
     //long int random = ::ndn::random::generateWord32();
     //random = random / (ValDistancesStrategy::MAX_32WORD_RANDOM/ValDistancesStrategy::DELAY_IN_MICROS);
-    long int random = m_randomNum->GetValue(0, ValDistancesStrategy::DELAY_IN_MICROS);
-    return time::microseconds{random};
+    long int random = m_randomNum->GetValue(10000, ValDistancesStrategy::DELAY_IN_NANOS);
+    return time::nanoseconds{random};
 }
 
 std::vector<std::string>
@@ -167,6 +175,7 @@ double
 ValDistancesStrategy::getMultiPointDist(const std::string pointA, std::vector<std::string> *pointsList)
 {
     size_t nItens = pointsList->size();
+    //NS_LOG_DEBUG("size of ifnt entries" << std::to_string(nItens));
     // geting first vector;
     std::stringstream stream_point;
     stream_point << pointA;
@@ -174,18 +183,22 @@ ValDistancesStrategy::getMultiPointDist(const std::string pointA, std::vector<st
     stream_point >> vectorA;
 
     // reset stream
-    stream_point.str(std::string());
+    // stream_point.str(std::string());
 
-    double dist = 0;
-    for(std::string point : *pointsList) {
-        stream_point << point;
+    double dist = 0.0;
+    for(const std::string& point : *pointsList) {
+        NS_LOG_DEBUG("Reference point: " << pointA);
+        NS_LOG_DEBUG("Interest came from: " << point);
+        std::stringstream stream_point_temp;
+        stream_point_temp << point;
         ns3::Vector3D vector;
-        stream_point >> vector;
+        stream_point_temp >> vector;
         dist += ns3::CalculateDistance(vectorA, vector);
         // reset stream
-        stream_point.str(std::string());
+        // stream_point.str(std::string());
     }
     // calculate the mean
+    NS_LOG_DEBUG("total dist: " << std::to_string(dist));
     dist = dist / double(nItens);
     return dist;
 }
@@ -234,74 +247,89 @@ ValDistancesStrategy::getMyArea()
     return getAreaFromPosition(myPosVector.x, myPosVector.y);
 }
 
-time::milliseconds
-ValDistancesStrategy::calcFwdTimer(double dist, bool isData)
+time::nanoseconds
+ValDistancesStrategy::calcFwdTimer(double dist, uint8_t hopC, bool toArea, bool isData)
 { 
     // less distance less time;
+    //long int dist = long(dist);
     double time = 0.0;
-    if(isData) { // uses prev Hop position
-        double dataWaitRange(ValDistancesStrategy::MAX_DATA_WAIT);
-        double comunicationRange(ValDistancesStrategy::SIGNAL_RANGE * 2);
-        time = dist / (comunicationRange / dataWaitRange);
-    } else { // interest uses DA
-        double interestWaitRange(ValDistancesStrategy::MAX_INTEREST_WAIT - ValDistancesStrategy::MAX_INTEREST_WAIT);
-        double biggestDistance(ValDistancesStrategy::MAX_DISTANCE);
-        time = dist / (biggestDistance / interestWaitRange);
+    double max_dist = double(ValDistancesStrategy::SIGNAL_RANGE);
+    double time_gap = 0.0;  // range of time
+    long int min_time = 0.0;  // minimum waiting time
+  
+    if(isData) {
+        time_gap = double(ValDistancesStrategy::MAX_DATA_WAIT - ValDistancesStrategy::MIN_DATA_WAIT);
+        min_time = ValDistancesStrategy::MIN_DATA_WAIT * 1000000; //to nano
+    } else { 
+        time_gap = double(ValDistancesStrategy::MAX_INTEREST_WAIT - ValDistancesStrategy::MIN_INTEREST_WAIT);
+        min_time = ValDistancesStrategy::MIN_INTEREST_WAIT * 1000000;  // to nano
     }
+
+    if(toArea) {
+        BOOST_ASSERT(hopC != 0); // is the dist calculated to an Area?: it needs hopC
+        max_dist = double(hopC * ValDistancesStrategy::SIGNAL_RANGE);
+        if(dist > max_dist) {
+            NS_LOG_DEBUG("calcFwdTimer dist > max_dist: " << std::to_string(dist) << " > " << 
+                std::to_string(max_dist) << " time: " << std::to_string(time) << 
+                " isData: " << std::boolalpha << isData << " toArea: " << std::boolalpha << toArea);
+                long int long_time_gap(time_gap);
+            return time::nanoseconds{min_time} + time::nanoseconds{long_time_gap} + this->generateMicroSecondDelay();
+        }
+    }
+
+    time = dist / (max_dist/time_gap); // this time is in milliseconds
+    time *= 1000000; // to nano
+    long int long_time(time);
+    NS_LOG_DEBUG("calcFwdTimer dist: " << std::to_string(dist) << " time: " << std::to_string(time) << 
+        " isData: " << std::boolalpha << isData << " toArea: " << std::boolalpha << toArea);
     
-    // getting the decimal part and convert it to microseconds
-    double whole;
-    double frac = std::modf(time, &whole);
-    frac = frac * 100; // micros - shiffting coma, now we have micros
-    time::microseconds micros = time::microseconds{int(frac)};
-    // getting the integer part and convert it to millisecons
-    time::milliseconds millis = time::milliseconds{int(whole)};
-    time::milliseconds duration;
-    if(!isData){
-        duration = time::milliseconds{ValDistancesStrategy::MIN_INTEREST_WAIT} + 
-                    millis + time::duration_cast<time::milliseconds>(micros) + 
-                    time::duration_cast<time::milliseconds>(generateMicroSecondDelay());
-    } else {
-        duration = millis + time::duration_cast<time::milliseconds>(micros) + 
-                    time::duration_cast<time::milliseconds>(generateMicroSecondDelay());
-    }
-    return duration;
+    // convertions to get time in nano seconds in the following maner
+    // min_time + time + random
+    return time::nanoseconds{min_time} + time::nanoseconds{long_time} + this->generateMicroSecondDelay();
 }
 
-time::milliseconds
-ValDistancesStrategy::calcInvertedFwdTimer(double dist, bool isData)
+time::nanoseconds
+ValDistancesStrategy::calcInvertedFwdTimer(double dist, uint8_t hopC, bool toArea, bool isData)
 {
-    // less distance less time;
+    // more distance less time;
     double time = 0.0;
-    double comunicationRange(ValDistancesStrategy::SIGNAL_RANGE * 2);
-    double timeInterval = 0.0;
-    if(isData) { // uses prev Hop position
-        timeInterval = double(ValDistancesStrategy::MAX_DATA_WAIT);
-    } else { // interest uses prev hop position
-        timeInterval = double(ValDistancesStrategy::MAX_INTEREST_WAIT - ValDistancesStrategy::MAX_INTEREST_WAIT);
-    }
-    time = (1.0 / dist) / (comunicationRange / timeInterval);
+    double max_dist = double(ValDistancesStrategy::SIGNAL_RANGE);
+    double time_gap = 0.0;  // range of time
+    long int min_time = 0;  // minimum waiting time
     
-    // getting the decimal part and convert it to microseconds
-    double whole;
-    double frac = std::modf(time, &whole);
-    frac = frac * 100; // micros - shiffting coma, now we have micros
-    time::microseconds micros = time::microseconds{int(frac)};
-    // getting the integer part and convert it to millisecons
-    time::milliseconds millis = time::milliseconds{int(whole)};
-    time::milliseconds duration;
-    if(!isData){
-        duration = time::milliseconds{ValDistancesStrategy::MIN_INTEREST_WAIT} + 
-                    millis + time::duration_cast<time::milliseconds>(micros) + 
-                    time::duration_cast<time::milliseconds>(generateMicroSecondDelay());
-    } else {
-        duration = millis + time::duration_cast<time::milliseconds>(micros) + 
-                    time::duration_cast<time::milliseconds>(generateMicroSecondDelay());
+    if(isData) {
+        time_gap = double(ValDistancesStrategy::MAX_DATA_WAIT - ValDistancesStrategy::MIN_DATA_WAIT);
+        min_time = ValDistancesStrategy::MIN_DATA_WAIT * 1000000; //to nano;
+    } else { 
+        time_gap = double(ValDistancesStrategy::MAX_INTEREST_WAIT - ValDistancesStrategy::MIN_INTEREST_WAIT);
+        min_time = ValDistancesStrategy::MIN_INTEREST_WAIT * 1000000; //to nano;
     }
-    return duration;
+    
+    if(toArea) {
+        BOOST_ASSERT(hopC != 0); // is the dist calculated to an Area?: it needs hopC
+        max_dist = double(hopC * ValDistancesStrategy::SIGNAL_RANGE);
+        if(dist > max_dist) {
+            NS_LOG_DEBUG("calcInvertedFwdTimer dist > max_dist: " << std::to_string(dist) << " > " << 
+                std::to_string(max_dist) << " time: " << std::to_string(time) << 
+                " isData: " << std::boolalpha << isData << " toArea: " << std::boolalpha << toArea);
+            return time::nanoseconds{min_time} + time::nanoseconds{min_time} + this->generateMicroSecondDelay();
+        }
+    }
+    if(dist <= max_dist)
+        time = time_gap - ((time_gap/max_dist) * dist); // this time is in milliseconds
+    else
+        time = double(min_time);
+    time *= 1000000; // to nano
+    long int long_time(time);
+    NS_LOG_DEBUG("calcInvertedFwdTimer dist: " << std::to_string(dist) << " time: " << std::to_string(time) << 
+        " isData: " << std::boolalpha << isData << " toArea: " << std::boolalpha << toArea);
+    
+    // convertions to get time in nano seconds in the following maner
+    // min_time + time + random
+    return time::nanoseconds{min_time} + time::nanoseconds{long_time} + this->generateMicroSecondDelay();
 }
 
-std::pair<uint32_t, std::string>
+std::pair<uint8_t, std::string>
 ValDistancesStrategy::getLongestJorney(ifnt::ListMatchResult* ifntEntriesList)
 {
     auto it = ifntEntriesList->begin();

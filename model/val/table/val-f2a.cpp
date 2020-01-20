@@ -75,23 +75,23 @@ F2A::findEntry(Entry& entry)
 std::pair<bool, std::shared_ptr<Entry>>
 F2A::findByFaceId(uint64_t faceId)
 {
-    auto it = m_f2a.begin();
-    for( ; it != m_f2a.end(); it++) {
+    
+    for(auto it = m_f2a.begin(); it != m_f2a.end(); it++) {
         if((*it)->getFaceId() == faceId)
             return {true, *it};
     }
-    return {false, *it};
+    return {false, nullptr};
 }
 
 std::pair<bool, std::shared_ptr<Entry>>
 F2A::findByGeoArea(std::string geoArea)
 {
-    auto it = m_f2a.begin();
-    for( ; it != m_f2a.end(); it++) {
+    
+    for(auto it = m_f2a.begin(); it != m_f2a.end(); it++) {
         if((*it)->getGeoArea() == geoArea)
             return {true, *it};
     }
-    return {false, *it};
+    return {false, nullptr};
 }
 
 const size_t

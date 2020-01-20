@@ -51,13 +51,11 @@ namespace ifnt {
     std::pair<bool, std::shared_ptr<Entry>>
     Ifnt::findMatch(const Entry& entry)
     {
-        auto it = m_table.begin();
-        while (it != m_table.end()) {
-            if (**it == entry)
-                break;
-            it++;
+        for (auto it = m_table.begin(); it != m_table.end(); it++) {
+            if(**it == entry)
+                return {true, *it};
         }
-        return {it != m_table.end(), *it}; //best if deleted on the caller
+        return {false, nullptr}; 
     }
 
     std::pair<bool, std::shared_ptr<Entry>>
@@ -65,7 +63,7 @@ namespace ifnt {
     {
         for (auto it = m_table.begin(); it != m_table.end(); it++) {
             if(it->get()->getNonce() == nonce)
-                return {it != m_table.end(), *it};
+                return {true, *it};
         }
         return {false, nullptr};
     }

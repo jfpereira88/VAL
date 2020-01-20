@@ -415,7 +415,9 @@ ValLinkService::doSendValPacket(const ::ns3::ndn::val::ValPacket& valPacket)
         Interest interest(valPacket.getInterest());
         lp::Packet lpPacket(interest.wireEncode());
         encodeLpFields(interest, lpPacket);
+        NS_LOG_DEBUG("before adding ValHeader to NDNLPV2");
         lpPacket.add<lp::ValHeaderField>(valPacket.getValHeader());
+        NS_LOG_DEBUG("after adding ValHeader to NDNLPV2");
         this->sendValPacket(std::move(lpPacket));
         break;
       }

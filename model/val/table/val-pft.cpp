@@ -32,7 +32,6 @@ PFT::addEntry(Entry& entry)
         m_nItens++;
         return {true, ptr_entry};
     }
-    found.first = false;
     return {false, found.second}; //found;
 }
 
@@ -42,8 +41,8 @@ PFT::addEntry(Entry& entry)
 std::pair<bool, std::shared_ptr<Entry>>
 PFT::findMatch(const ValPacket& valPkt)
 {
-    auto it = m_pft.begin();
-    for(; it != m_pft.end(); it++) {
+    
+    for(auto it = m_pft.begin(); it != m_pft.end(); it++) {
         // it needs to be the same ndn type
         if(valPkt.isSet() == (*it)->getValPacket().isSet()) {
             if(valPkt.isSet() == ValPacket::INTEREST_SET) {
@@ -57,7 +56,7 @@ PFT::findMatch(const ValPacket& valPkt)
             }
         }
     }
-    return {false, *it};
+    return {false, nullptr};
 }
 
 ListMatchResult
@@ -67,13 +66,15 @@ PFT::findMatchByNonceList(std::vector<uint32_t> *nonceList)
     for(auto it = m_pft.begin(); it != m_pft.end(); it++) {
         // it needs to be Interest
         if((*it)->getValPacket().isSet() == ValPacket::INTEREST_SET) {
-            for(uint32_t nonce : *nonceList) {
+            for(const auto &nonce : *nonceList) {
                 if((*it)->getValPacket().getInterest().getNonce() == nonce) {
                     res.push_back(*it);
-                    m_pft.erase(it);
+                    //m_pft.erase(it);
                 }
             }
         }
+        if(res.size() == nonceList->size())
+            break;
     }
     return res;
 }
@@ -81,9 +82,9 @@ PFT::findMatchByNonceList(std::vector<uint32_t> *nonceList)
 bool
 PFT::removeEntry(const ValPacket& valPkt)
 {
-    auto it = m_pft.begin();
+   
     bool state = false;
-    for(; it != m_pft.end(); it++) {
+    for( auto it = m_pft.begin(); it != m_pft.end(); it++) {
         // it needs to be the same ndn type
         if(valPkt.isSet() == (*it)->getValPacket().isSet()) {
             if(valPkt.isSet() == ValPacket::INTEREST_SET) {

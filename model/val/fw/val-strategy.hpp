@@ -10,6 +10,7 @@
 
 #include "ns3/mobility-module.h"
 
+
 namespace ns3 {
 namespace ndn {
 namespace val {
@@ -49,12 +50,15 @@ public:
     void
     setMobilityModel(Ptr<ns3::WaypointMobilityModel> mobilityModel)
     {
-        m_mobilityModel = mobilityModel;
+        BOOST_ASSERT(mobilityModel != nullptr);
+        if(mobilityModel != nullptr) {
+            m_mobilityModel = mobilityModel;
+        }
     }
 
 protected:
     void
-    sendValPacket(const uint64_t outFaceId, ValPacket& valPkt, time::milliseconds duration)
+    sendValPacket(const uint64_t outFaceId, ValPacket& valPkt, time::nanoseconds duration)
     {
         m_valFwd.registerOutgoingValPacket(outFaceId, valPkt, duration);
     }
@@ -101,14 +105,15 @@ protected:
     doAfterDfntMiss(uint64_t faceId, const ndn::Data& data, ifnt::ListMatchResult* ifntEntries, bool isProducer) = 0;
 
 protected:
-    static constexpr int MIN_INTEREST_WAIT = 40;
-    static constexpr int MAX_INTEREST_WAIT = 80;
-    static constexpr int MAX_DATA_WAIT = 39;
-    static constexpr int ZERO_WAIT = 0;
-    static constexpr int DELAY_IN_MICROS = 250;
-    static constexpr int SIGNAL_RANGE = 50;
-    static constexpr int AREA_SIZE = 200; // area is a rectangle 200 x 200 (L x L);
-    static constexpr int MAX_DISTANCE = 5300;
+    static constexpr long int MIN_INTEREST_WAIT = 32; // in ms
+    static constexpr long int MAX_INTEREST_WAIT = 62; // in ms
+    static constexpr long int MIN_DATA_WAIT = 0;      // in ms
+    static constexpr long int MAX_DATA_WAIT = 30;     // in ms
+    static constexpr long int ZERO_WAIT = 0;          // in ms
+    static constexpr long int DELAY_IN_NANOS = 40000; // in ns
+    static constexpr long int SIGNAL_RANGE = 100;      // in meters
+    static constexpr long int AREA_SIZE = 200;        // area is a rectangle 200m x 200m (L x L);
+    static constexpr long int MAX_DISTANCE = 5300;    // in meters
 
 private:
     ValForwarder& m_valFwd;

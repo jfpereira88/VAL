@@ -36,6 +36,14 @@ public:
     bool
     removeEntry(const ValPacket& valPkt);
 
+    void
+    removeEntriesByMatchList(ListMatchResult& entries)
+    {
+        for(const auto& entry : entries) {
+            removeEntry(entry->getValPacket());
+        }
+    }
+
     const size_t
     getSize() const; 
 

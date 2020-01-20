@@ -23,7 +23,7 @@ Dfnt::~Dfnt()
 void
 Dfnt::addEntry(Entry& entry)
 {
-    m_table.push_back(std::make_shared<Entry>(entry));
+    m_table.push_front(std::make_shared<Entry>(entry));
     m_nItens++;
 }
 
@@ -67,7 +67,7 @@ Dfnt::findMatch(::ndn::Signature sig)
         }
         it++;
     }
-    return {false, *it};
+    return {false, nullptr};
 }
 
 } // namespace dfnt

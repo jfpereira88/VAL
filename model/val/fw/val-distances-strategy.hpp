@@ -31,7 +31,7 @@ private:
     virtual void
     doAfterDfntMiss(uint64_t faceId, const ndn::Data& data, ifnt::ListMatchResult* ifntEntries, bool isProducer) override;
 
-    time::microseconds
+    time::nanoseconds
     generateMicroSecondDelay();
 
     std::vector<std::string>
@@ -52,11 +52,11 @@ private:
     std::string
     getMyArea();
 
-    time::milliseconds
-    calcFwdTimer(double dist, bool isData = false);
+    time::nanoseconds
+    calcFwdTimer(double dist, uint8_t hopC = 0, bool toArea = false, bool isData = false);
 
-    time::milliseconds
-    calcInvertedFwdTimer(double dist, bool isData = false);
+    time::nanoseconds
+    calcInvertedFwdTimer(double dist, uint8_t hopC = 0, bool toArea = false, bool isData = false);
 
     std::string
     getAreaFromPosition(double _x, double _y);
@@ -68,7 +68,7 @@ private:
      *  \brief return the information of the interest that as done the longest jorney
      *  \return first: hopc, second: sourceArea
      */
-    std::pair<uint32_t, std::string>
+    std::pair<uint8_t, std::string>
     getLongestJorney(ifnt::ListMatchResult* ifntEntriesList);
 
 private:

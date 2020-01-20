@@ -10,6 +10,7 @@
 #include "NFD/daemon/fw/forwarder.hpp"
 #include "NFD/core/scheduler.hpp"
 
+#include "../val-api.hpp"
 #include "../val-packet.hpp"
 #include "../table/val-ifnt.hpp"
 #include "../table/val-dfnt.hpp"
@@ -48,7 +49,7 @@ public:
     reveiceData(const nfd::Face *inGeoface, const Data& data, std::vector<uint32_t> *nonceList, bool isProducer);
 
     void
-    registerOutgoingValPacket(const nfd::FaceId outFaceId, ValPacket& valPkt, time::milliseconds duration);
+    registerOutgoingValPacket(const nfd::FaceId outFaceId, ValPacket& valPkt, time::nanoseconds duration);
 
 private:
     void

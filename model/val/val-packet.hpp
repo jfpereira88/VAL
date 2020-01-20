@@ -50,7 +50,7 @@ public:
 
 private:
     uint8_t m_isSet;
-    const ValHeader& m_valH;
+    ValHeader m_valH;
     std::shared_ptr<::ndn::Interest> m_interest;
     std::shared_ptr<::ndn::Data> m_data;
 };

@@ -42,7 +42,7 @@ namespace ns3{
 NS_LOG_COMPONENT_DEFINE ("V2VSimple");
 
 
-static const uint32_t numNodes = 6;
+static const uint32_t numNodes = 7;
 
 void printPosition(Ptr<const MobilityModel> mobility) //DEBUG purpose
 {
@@ -62,8 +62,38 @@ void installMobility(NodeContainer &c, int simulationEnd)
     Ptr<WaypointMobilityModel> wayMobility[numNodes];
     for (uint32_t i = 0; i < numNodes; i++) {
       wayMobility[i] = c.Get(i)->GetObject<WaypointMobilityModel>();
-      Waypoint waypointStart(Seconds(0), Vector3D(i*50, 0, 0));
-      Waypoint waypointEnd(Seconds(simulationEnd), Vector3D(i*50, 0, 0));
+      Waypoint waypointStart;
+      Waypoint waypointEnd;
+      // i*50+138
+      if(i == 0) {
+        waypointStart = Waypoint(Seconds(0), Vector3D(95, 150, 0));
+        waypointEnd = Waypoint(Seconds(simulationEnd), Vector3D(95, 150, 0));
+      }
+      if(i == 1) {
+        waypointStart = Waypoint(Seconds(0), Vector3D(195, 150, 0));
+        waypointEnd = Waypoint(Seconds(simulationEnd), Vector3D(195, 150, 0));
+      }
+      if(i == 2) {
+        waypointStart = Waypoint(Seconds(0), Vector3D(295, 150, 0));
+        waypointEnd = Waypoint(Seconds(simulationEnd), Vector3D(300, 150, 0));
+      }
+      if(i == 3) {
+        waypointStart = Waypoint(Seconds(0), Vector3D(395, 150, 0));
+        waypointEnd = Waypoint(Seconds(simulationEnd), Vector3D(405, 150, 0));
+      }
+      if(i == 4) {
+        waypointStart = Waypoint(Seconds(0), Vector3D(495, 150, 0));
+        waypointEnd = Waypoint(Seconds(simulationEnd), Vector3D(505, 150, 0));
+      }
+      if(i == 5) {
+        waypointStart = Waypoint(Seconds(0), Vector3D(595, 150, 0));
+        waypointEnd = Waypoint(Seconds(simulationEnd), Vector3D(300, 255, 0));
+      }
+      if(i == 6) {
+        waypointStart = Waypoint(Seconds(0), Vector3D(300, 250, 0));
+        waypointEnd = Waypoint(Seconds(simulationEnd), Vector3D(300, 255, 0));
+      }
+
 
       wayMobility[i]->AddWaypoint(waypointStart);
       wayMobility[i]->AddWaypoint(waypointEnd);
@@ -108,7 +138,7 @@ void installWifi(NodeContainer &c, NetDeviceContainer &devices)
   YansWifiChannelHelper wifiChannel;
   wifiChannel.SetPropagationDelay("ns3::ConstantSpeedPropagationDelayModel");
   wifiChannel.AddPropagationLoss("ns3::RangePropagationLossModel",
-                                 "MaxRange", DoubleValue(100.0));
+                                 "MaxRange", DoubleValue(110.0));
   wifiChannel.AddPropagationLoss("ns3::NakagamiPropagationLossModel",
                                  "m0", DoubleValue(1.0),
                                  "m1", DoubleValue(1.0),
@@ -182,14 +212,16 @@ int main (int argc, char *argv[])
   
   //setting application
   //Ptr<UniformRandomVariable> randomNum = CreateObject<UniformRandomVariable> ();
-  uint32_t producerId = 5;//randomNum->GetValue(0,numNodes-1);
-  uint32_t consumerId = 0;
+  uint32_t producerId = 6;//randomNum->GetValue(0,numNodes-1);
+  uint32_t consumerId1 = 0;
+  uint32_t consumerId2 = 5;
 
   NodeContainer producer;
   producer.Add(c.Get(producerId));
 
   NodeContainer consumers;
-  consumers.Add(c.Get(consumerId));
+  consumers.Add(c.Get(consumerId1));
+  consumers.Add(c.Get(consumerId2));
   /*
   for(uint32_t i=0; i<numNodes; i++){
     if(i!=producerId){

@@ -111,7 +111,7 @@ protected:
     static constexpr long int MAX_DATA_WAIT = 30;     // in ms
     static constexpr long int ZERO_WAIT = 0;          // in ms
     static constexpr long int DELAY_IN_NANOS = 40000; // in ns
-    static constexpr long int SIGNAL_RANGE = 100;      // in meters
+    static constexpr long int SIGNAL_RANGE = 110;      // in meters
     static constexpr long int AREA_SIZE = 200;        // area is a rectangle 200m x 200m (L x L);
     static constexpr long int MAX_DISTANCE = 5300;    // in meters
 

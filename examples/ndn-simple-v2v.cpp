@@ -5,6 +5,7 @@
 #include "ns3/wifi-module.h"
 #include "ns3/random-variable-stream.h"
 #include "ns3/ndnSIM-module.h"
+#include "ns3/ndnSIM/model/ndn-block-header.hpp"
 #include "ns3/ndnSIM/apps/ndn-producer.hpp"
 #include "ns3/ndnSIM/apps/ndn-consumer-cbr.hpp"
 #include "ns3/ndnSIM/apps/ndn-app.hpp"
@@ -41,8 +42,28 @@ namespace ns3{
 
 NS_LOG_COMPONENT_DEFINE ("V2VSimple");
 
+class PcapWriter {
+public:
+  PcapWriter(const std::string& file)
+  {
+    PcapHelper helper;
+    m_pcap = helper.CreateFile(file, std::ios::out, PcapHelper::DLT_IEEE802_11);
+  }
 
-static const uint32_t numNodes = 7;
+  void
+  TracePacket(Ptr<const Packet> packet)
+  {
+    static WifiMacHeader wifiHeader;
+
+    m_pcap->Write(Simulator::Now(), wifiHeader, packet);
+  }
+
+private:
+  Ptr<PcapFileWrapper> m_pcap;
+};
+
+
+static const uint32_t numNodes = 6;
 
 void printPosition(Ptr<const MobilityModel> mobility) //DEBUG purpose
 {
@@ -65,7 +86,9 @@ void installMobility(NodeContainer &c, int simulationEnd)
       Waypoint waypointStart;
       Waypoint waypointEnd;
       // i*50+138
-      if(i == 0) {
+      waypointStart = Waypoint(Seconds(0), Vector3D(i*50, 0, 0));
+      waypointEnd = Waypoint(Seconds(simulationEnd), Vector3D(i*50+138, 0, 0));
+      /*if(i == 0) {
         waypointStart = Waypoint(Seconds(0), Vector3D(95, 150, 0));
         waypointEnd = Waypoint(Seconds(simulationEnd), Vector3D(95, 150, 0));
       }
@@ -92,7 +115,7 @@ void installMobility(NodeContainer &c, int simulationEnd)
       if(i == 6) {
         waypointStart = Waypoint(Seconds(0), Vector3D(300, 250, 0));
         waypointEnd = Waypoint(Seconds(simulationEnd), Vector3D(300, 255, 0));
-      }
+      }*/
 
 
       wayMobility[i]->AddWaypoint(waypointStart);
@@ -144,6 +167,7 @@ void installWifi(NodeContainer &c, NetDeviceContainer &devices)
                                  "m1", DoubleValue(1.0),
                                  "m2", DoubleValue(1.0));
   wifiPhy.SetChannel(wifiChannel.Create());
+  wifiPhy.EnablePcapAll("cs4");
 
   // Add a non-QoS upper mac
   WifiMacHelper wifiMac;
@@ -212,16 +236,16 @@ int main (int argc, char *argv[])
   
   //setting application
   //Ptr<UniformRandomVariable> randomNum = CreateObject<UniformRandomVariable> ();
-  uint32_t producerId = 6;//randomNum->GetValue(0,numNodes-1);
-  uint32_t consumerId1 = 0;
-  uint32_t consumerId2 = 5;
+  uint32_t producerId = 5;//randomNum->GetValue(0,numNodes-1);
+  uint32_t consumerId1 = 2;
+  //uint32_t consumerId2 = 5;
 
   NodeContainer producer;
   producer.Add(c.Get(producerId));
 
   NodeContainer consumers;
   consumers.Add(c.Get(consumerId1));
-  consumers.Add(c.Get(consumerId2));
+  //consumers.Add(c.Get(consumerId2));
   /*
   for(uint32_t i=0; i<numNodes; i++){
     if(i!=producerId){
@@ -245,7 +269,13 @@ int main (int argc, char *argv[])
   //AnimationInterface anim(animFile);
 
   ndn::AppDelayTracer::InstallAll("app-delays-trace.txt");
-  ndn::L3RateTracer::InstallAll("rate-trace.txt", Seconds(1));
+  ndn::L3RateTracer::InstallAll("rate-trace.txt", Seconds(0.5));
+  //L2RateTracer::InstallAll("drop-trace.txt", Seconds(0.5)); not usefull
+
+  PcapWriter trace("ndn-simple-v2v-trace.pcap");
+  Config::ConnectWithoutContext("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/MacTx",
+                                MakeCallback(&PcapWriter::TracePacket, &trace));
+
   Simulator::Run ();
   return 0;
 }

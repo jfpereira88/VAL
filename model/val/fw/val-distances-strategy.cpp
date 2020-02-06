@@ -38,7 +38,7 @@ ValDistancesStrategy::doAfterIfntHit(uint64_t faceId, const std::shared_ptr<cons
         return; // drop packet
     }
     
-    if(ifntEntry->getDA() != "0") { // known destination
+    if(ifntEntry->getDA() != "0" && ifntEntry->getDA() != getMyArea()) { // known destination
         // get distance between ifntEntry->getPhPos() and ifntEntry->getDA()
         uint32_t preHopDist = getDistanceToArea(ifntEntry->getPhPos(), ifntEntry->getDA());
         // get distance between getMyPos() and ifntEntry->getDA()
@@ -116,7 +116,7 @@ ValDistancesStrategy::doAfterDfntHit(uint64_t faceId, const std::shared_ptr<cons
     uint32_t prevHopDist = getMultiPointDist(dfntEntry->getPhPos(), &nextHopsPosList); //getDistanceToArea(dfntEntry->getPhPos(), dfntEntry->getDA());
     uint32_t myDist = getMultiPointDist(getMyPos(), &nextHopsPosList);//getDistanceToArea(getMyPos(), dfntEntry->getDA());
     if(myDist < prevHopDist) {
-        time::nanoseconds time = calcFwdTimer(myDist, dfntEntry->getHopC()+1, true, true);
+        time::nanoseconds time = calcFwdTimer(myDist, 0, false, true);
         ValHeader valH(dfntEntry->getSA(), dfntEntry->getDA(), 
                     getMyPos(), dfntEntry->getRN(), dfntEntry->getHopC());
         ValPacket valP(valH);

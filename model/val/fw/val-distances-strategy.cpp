@@ -35,6 +35,7 @@ ValDistancesStrategy::doAfterIfntHit(uint64_t faceId, const std::shared_ptr<cons
 {
     NS_LOG_DEBUG(__func__);
     if(ifntEntry->getHopC() == 0) {
+        NS_LOG_DEBUG("packet dropped hopC = 0");
         return; // drop packet
     }
     
@@ -54,7 +55,8 @@ ValDistancesStrategy::doAfterIfntHit(uint64_t faceId, const std::shared_ptr<cons
               sendValPacket(ifntEntry->getFaceId(), valP, time);
          } else {
         //      drop packet
-            NS_LOG_DEBUG("my dist > prevHopDist " << std::to_string(myDist) << " > " << std::to_string(preHopDist)); 
+            NS_LOG_DEBUG("my dist > prevHopDist " << std::to_string(myDist) << " > " << std::to_string(preHopDist));
+            NS_LOG_DEBUG("packet dropped");
          }
     } else {  // exploration phase
         // get distance betwwen the current node and the previous node
@@ -110,12 +112,14 @@ ValDistancesStrategy::doAfterDfntHit(uint64_t faceId, const std::shared_ptr<cons
 {
     NS_LOG_DEBUG(__func__);
     if(dfntEntry->getHopC() == 0) {
+        NS_LOG_DEBUG("packet dropped hopC = 0");
         return; // drop packet
     }
     std::vector<std::string> nextHopsPosList = getPositions(ifntEntries);
     uint32_t prevHopDist = getMultiPointDist(dfntEntry->getPhPos(), &nextHopsPosList); //getDistanceToArea(dfntEntry->getPhPos(), dfntEntry->getDA());
     uint32_t myDist = getMultiPointDist(getMyPos(), &nextHopsPosList);//getDistanceToArea(getMyPos(), dfntEntry->getDA());
-    if(myDist < prevHopDist) {
+    //
+    if(prevHopDist > ValDistancesStrategy::SIGNAL_RANGE && myDist < prevHopDist) {
         time::nanoseconds time = calcFwdTimer(myDist, 0, false, true);
         ValHeader valH(dfntEntry->getSA(), dfntEntry->getDA(), 
                     getMyPos(), dfntEntry->getRN(), dfntEntry->getHopC());
@@ -124,8 +128,14 @@ ValDistancesStrategy::doAfterDfntHit(uint64_t faceId, const std::shared_ptr<cons
         sendValPacket(dfntEntry->getFaceId(), valP, time);
         // @REMEMBER: Data Last hop does not receive ImpACK
     } else {
-        NS_LOG_DEBUG("my dist > prevHopDist " << std::to_string(myDist) << " > " << std::to_string(prevHopDist)
+        if(myDist > prevHopDist) {
+            NS_LOG_DEBUG("my dist > prevHopDist " << std::to_string(myDist) << " > " << std::to_string(prevHopDist)
             << " ifntEntries size " << std::to_string(ifntEntries->size()));
+        } else {
+            NS_LOG_DEBUG("prevHopDist < SIGNAL_RANGE prev-hop already served the next-hop " << std::to_string(prevHopDist) << " < " << std::to_string(ValDistancesStrategy::SIGNAL_RANGE)
+            << " ifntEntries size " << std::to_string(ifntEntries->size()));
+        }
+        NS_LOG_DEBUG("packet dropped");
     }
     // else drop packet
 }

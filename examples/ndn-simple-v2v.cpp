@@ -47,7 +47,7 @@ public:
   PcapWriter(const std::string& file)
   {
     PcapHelper helper;
-    m_pcap = helper.CreateFile(file, std::ios::out, PcapHelper::DLT_IEEE802_11);
+    m_pcap = helper.CreateFile(file, std::ios::out, PcapHelper::DLT_IEEE802_11_RADIO);
   }
 
   void
@@ -167,7 +167,7 @@ void installWifi(NodeContainer &c, NetDeviceContainer &devices)
                                  "m1", DoubleValue(1.0),
                                  "m2", DoubleValue(1.0));
   wifiPhy.SetChannel(wifiChannel.Create());
-  wifiPhy.EnablePcapAll("cs4");
+  wifiPhy.SetPcapDataLinkType(WifiPhyHelper::DLT_IEEE802_11_RADIO);
 
   // Add a non-QoS upper mac
   WifiMacHelper wifiMac;
@@ -178,6 +178,7 @@ void installWifi(NodeContainer &c, NetDeviceContainer &devices)
                                "ControlMode", StringValue(phyMode));
 
   devices = wifi.Install(wifiPhy, wifiMac, c);
+  wifiPhy.EnablePcap("ndn-simple-v2v", devices);
 }
 
 void installNDN(NodeContainer &c)
@@ -272,9 +273,9 @@ int main (int argc, char *argv[])
   ndn::L3RateTracer::InstallAll("rate-trace.txt", Seconds(0.5));
   //L2RateTracer::InstallAll("drop-trace.txt", Seconds(0.5)); not usefull
 
-  PcapWriter trace("ndn-simple-v2v-trace.pcap");
-  Config::ConnectWithoutContext("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/MacTx",
-                                MakeCallback(&PcapWriter::TracePacket, &trace));
+  //PcapWriter trace("ndn-simple-v2v-trace.pcap");
+  //Config::ConnectWithoutContext("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/MacTx",
+  //                              MakeCallback(&PcapWriter::TracePacket, &trace));
 
   Simulator::Run ();
   return 0;

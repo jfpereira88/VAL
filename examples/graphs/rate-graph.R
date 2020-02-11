@@ -12,7 +12,7 @@ library(doBy)
 #########################
 # Rate trace processing #
 #########################
-data <- read.table("rate-trace-cs4.txt", header=T)
+data <- read.table("rate-trace-cs4-v2.txt", header=T)
 data$Node <- factor(data$Node)
 data$FaceDescr <- factor(data$FaceDescr)
 data$FaceId <- factor(data$FaceId)
@@ -69,7 +69,7 @@ retval <- dev.off()
 
 #aes (x=Type, y=PacketRaw.sum, color=Type), size=1
 
-delay_dat <- read.table("app-delays-trace-cs4.txt", header=T)
+delay_dat <- read.table("app-delays-trace-cs4-v2.txt", header=T)
 delay_dat$Node <- factor(delay_dat$Node)
 delay_dat$SeqNo <- factor(delay_dat$SeqNo)
 delay_dat$Type <- factor(delay_dat$Type)

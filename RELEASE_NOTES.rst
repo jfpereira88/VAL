@@ -1,1 +1,0 @@
-docs/source/RELEASE_NOTES.rst

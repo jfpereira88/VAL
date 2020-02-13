@@ -1,4 +1,16 @@
 /**
+ * \mainpage
+ * This work introduces an application of the Named Data Networking (NDN) to Vehicular 
+ * Ad-Hoc Networks (VANETs), with support for geographical-based forwarding. 
+ * The initial design, dubbed Vehicle Adaptation Layer (VAL), illustrates how this can 
+ * be done without altering the NDN primitives and core structures. 
+ * The design provides (1) a mechanism to bind NDN data names to the producers’ 
+ * and consumers' geographic areas; (2) an algorithm to guide Interests towards data 
+ * producers using the distances between nodes and distances to the producers' areas;  
+ * (3) an algorithm to guide Data packets towards data consumers' using the distances 
+ * between nodes; (4) a discovery mechanism to find producers' areas.
+ * 
+ * Masters Dissertion:
  * jfp 2019
  * mieti - uminho
  */

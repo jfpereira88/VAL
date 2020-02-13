@@ -17,9 +17,14 @@ namespace ndn {
 namespace val {
 namespace dfnt {
 
+/**
+ * \brief This class represents a DFNT Entry.
+ * \details contains all the information of a ValHeader associated with a Data packet<br>
+ * as well as the signature of the Data packet and the incoming face id <br>
+ * This class supplies methods to get all it menber variables.
+ */
 class Entry
 {
-
 public:
     Entry(const ValHeader& valHeader, const ::ndn::Data& data, uint64_t faceId);
     ~Entry();

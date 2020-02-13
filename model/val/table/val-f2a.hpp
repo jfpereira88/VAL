@@ -18,7 +18,10 @@ namespace val {
 namespace f2a {
 
 using Table = std::list<std::shared_ptr<Entry>>; 
-
+/**
+ * \brief F2A Face-to-Area table
+ * \details table that stores the relation between geo-areas and interfaces (geoFaces)
+ */
 class F2A
 {
 public:
@@ -39,10 +42,16 @@ public:
 
     const bool
     findEntry(Entry& entry);
-
+    
+    /**
+     * \brief finds entry by faceID
+     */
     std::pair<bool, std::shared_ptr<Entry>>
     findByFaceId(uint64_t faceId);
 
+    /**
+     * \brief finds entry by geo-area
+     */
     std::pair<bool, std::shared_ptr<Entry>>
     findByGeoArea(std::string geoArea);
 

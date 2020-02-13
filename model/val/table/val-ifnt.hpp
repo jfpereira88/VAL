@@ -3,12 +3,6 @@
  * mieti - uminho
  */
 
-/** \brief IFNT - Interest From Network Table, VAL support structure.
- * 
- * contains information of the LAL header and the nonce of every 
- * Interest that comes from the network. 
- */ 
-
 #ifndef VAL_TABLE_IFNT_HPP
 #define VAL_TABLE_IFNT_HPP
 
@@ -28,30 +22,39 @@ namespace ifnt{
 using Table = std::list<std::shared_ptr<Entry>>;
 using ListMatchResult = std::vector<std::shared_ptr<Entry>>;
 
+/** \brief Ifnt - Interest From Network Table, VAL support structure.
+ * 
+ * Contains information of the VAL header and the nonce of every 
+ * Interest that comes from the network. 
+ */ 
 class Ifnt : boost::noncopyable
 {
 public:
 
-    /** \brief Default constructor
-    */
+    /** 
+     * \brief Default constructor
+        */
     Ifnt();
     ~Ifnt();
     
-    /** \brief Adds entry to IFNT
+    /** 
+     * \brief Adds entry to IFNT
     *  \param entry a IFNT Entry
     *  \return true for success
     */
     bool
     addEntry(Entry& entry);
 
-    /** \brief removes entry from IFNT
+    /** 
+     * \brief removes entry from IFNT
      *  \param entry a reference to the IFNT Entry to remove
      *  \return true for success
      */ 
     bool
     removeEntry(const Entry& entry);
 
-    /** \brief removes entry from IFNT by nonce
+    /** 
+     * \brief removes entry from IFNT by nonce
      *  \param nonce a uint32_t with the nonce value
      *  \return true for success
      */
@@ -64,7 +67,8 @@ public:
         return pair.first;
     }
 
-    /** \brief removes entries from IFNT by nonce list
+    /** 
+     * \brief removes entries from IFNT by nonce list
      *  \param nonceList a pointer to the list of nonces
      */
     void
@@ -75,7 +79,8 @@ public:
         }
     }
 
-    /** \brief finds an entry in IFNT
+    /** 
+     * \brief finds an entry in IFNT
      *  \param entry a reference to the IFNT entry to match
      *  \return pair in which the first member is a shared pointer to the entry
      *          and the second is a boolean refleting the succes of the operation 
@@ -98,6 +103,9 @@ public:
     ListMatchResult
     findMatchByNonceList(std::vector<uint32_t> *nonceList);
 
+    /**
+     *  \brief The size of the table
+     */
     inline size_t
     getIfntSize()
     {

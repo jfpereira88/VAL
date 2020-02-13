@@ -86,7 +86,7 @@ public:
   nfd::PacketCounter nOutValPkt;
 };
 
-/** \brief ValLinkService is a LinkService that implements the NDNLPv2 protocol
+/** \brief ValLinkService is a LinkService that implements the NDNLPv2 protocol with ValHeader
  *  \sa https://redmine.named-data.net/projects/nfd/wiki/NDNLPv2
  */
 class ValLinkService : public LinkService
@@ -203,7 +203,7 @@ private: // send path
   void
   checkCongestionLevel(lp::Packet& pkt);
   
-  /** \brief method that is call by LinkService to send a Val packet
+  /** \brief method that is called by LinkService to send a Val packet
    *  \param valPacket a val layer packet
    */
   void
@@ -215,19 +215,35 @@ private: // receive path
   void
   doReceivePacket(Transport::Packet&& packet) override;
   
+  /**
+   * \brief This function tags the Interest packet with the fields of th NDNLPv2 Header
+   */
   std::shared_ptr<::ndn::Interest>
   decodeInterest(const Block& netPkt, const lp::Packet& firstPkt);
 
+  /**
+   * \brief This function tags the Data packet with the fields of th NDNLPv2 Header
+   */
   std::shared_ptr<::ndn::Data>
   decodeData(const Block& netPkt, const lp::Packet& firstPkt);
 
 private: // pure virtual methods from LinkService that are not used but need to be define
+  
+  /**
+   * \brief overrides base class method and sends - making it do nothing
+   */
   void
   doSendInterest(const Interest& interest) override;
 
+  /**
+   * \brief overrides base class method and sends - making it do nothing
+   */
   void
   doSendData(const Data& data) override;
 
+  /**
+   * \brief overrides base class method and sends - making it do nothing
+   */
   void
   doSendNack(const lp::Nack& nack) override;
 

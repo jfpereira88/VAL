@@ -18,7 +18,7 @@ The design provides:
  - (5) a mechanism to mitigate Broadcast Storms. (Forwarding cancellation based on timers and retransmission of packets from node in better position)
  - (6) a mechanism that mitigates intermittent communications characteristic of VANETs (implicit acknowlegment)
  
- This work is based on the LAL presented in NAVIGO https://ieeexplore.ieee.org/abstract/document/7158165
+ This work is based on the LAL presented in [NAVIGO] (https://ieeexplore.ieee.org/abstract/document/7158165)
  
  VAL is still in an embryonic stage of development.
 
@@ -30,6 +30,8 @@ The design provides:
 ```shell
  NS_LOG="ndn.val.ValForwarder:ndn.val.ValDistancesStrategy:ndn.val.face.ValLinkService:V2VSimple:ndn-cxx.nfd.Forwarder:ndn-cxx.nfd.BroadcastStrategy:ndn.Consumer:ndn.Producer" ./waf --run ndn-simple-v2v
 ```
+
+VAL documentation can be found [here](https://jfpereira88.github.io/VAL/)
 ----
 
 

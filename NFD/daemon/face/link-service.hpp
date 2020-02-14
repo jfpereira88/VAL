@@ -221,6 +221,7 @@ private: // lower interface to be overridden in subclass
  */
 public: // upper interface to be invoked by Val
   /** \brief sends valPacket
+   * \ingroup val
   */
   void
   sendValPacket(const ::ns3::ndn::val::ValPacket& valPacket);
@@ -228,16 +229,21 @@ public: // upper interface to be invoked by Val
   /** \brief signals on ValPacket received
    * jfp 2019
    * mieti - uminho
+   * \ingroup val
    */
   signal::Signal<LinkService, ::ns3::ndn::val::ValPacket> afterReceiveValPkt;
 
 protected: // upper interface to be invoked in subclass
   /** \brief delivers received valPacket to VAL forwarding
+   * \ingroup val
    */
   void
   receiveValPacket(const ::ns3::ndn::val::ValPacket& valPacket);
 
 private:// interface to be overridden in subclass
+/** \ingroup val
+ * \brief to be overriden bty subclass in order to send ValPackets
+ */
   virtual void
   doSendValPacket(const ::ns3::ndn::val::ValPacket& valPacket);
 
@@ -249,36 +255,42 @@ private:// interface to be overridden in subclass
  * ######################################
  */
 public: // interface to be invoked by VAL
-  /** \brief passes Interest to NFD forwarder
+  /** \ingroup val 
+   * \brief passes Interest to NFD forwarder
    */
   void 
   sendInterestToForwarder(const Interest& interest);
 
-  /** \brief passes Data to NFD forwarder
+  /** \ingroup val 
+   * \brief passes Data to NFD forwarder
    */
   void 
   sendDataToForwarder(const Data& data);
 
 public: // interface to be invoked by the forwarder
-  /** \brief passes Interest to VAL
+  /** \ingroup val 
+   * \brief passes Interest to VAL
    */
   void
   sendInterestToVal(const Interest& interest);
 
-  /** \brief passes Data to VAL
+  /** \ingroup val 
+   * \brief passes Data to VAL
    */
   void
   sendDataToVal(const Data& data, std::vector<uint32_t> *nonceList, bool isProducer);
 
 private: // interface to be overridden in subclass: to be used by forwarder to pass NDN packets to VAL
-  /** \brief performs LinkService spcific operations to send DataPkt to VAL
+  /** \ingroup vall 
+   * \brief performs LinkService spcific operations to send DataPkt to VAL
    * jfp 2019
    * mieti - uminho
    */
   virtual void
   doSendDataToVal(const Data& data, std::vector<uint32_t> *nonceList, bool isProducer);
   
-  /** \brief performs LinkService spcific operations to send IntPkt to VAL
+  /** \ingroup val 
+   * \brief performs LinkService spcific operations to send IntPkt to VAL
    * jfp 2019
    * mieti - uminho
    */

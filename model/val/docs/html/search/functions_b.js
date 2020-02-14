@@ -1,14 +1,9 @@
 var searchData=
 [
-  ['registeroutgoingvalpacket',['registerOutgoingValPacket',['../classns3_1_1ndn_1_1val_1_1ValForwarder.html#ad2f21e32a617f077a6be268982357095',1,'ns3::ndn::val::ValForwarder']]],
-  ['removebyfaceid',['removeByFaceId',['../classns3_1_1ndn_1_1val_1_1f2a_1_1F2A.html#a52374d23c2e4f6a438b9bdde58770860',1,'ns3::ndn::val::f2a::F2A']]],
-  ['removebygeoarea',['removeByGeoArea',['../classns3_1_1ndn_1_1val_1_1f2a_1_1F2A.html#a96879db24e09ed856519af2063b0ec52',1,'ns3::ndn::val::f2a::F2A']]],
-  ['removeentriesbymatchlist',['removeEntriesByMatchList',['../classns3_1_1ndn_1_1val_1_1pft_1_1PFT.html#a4239c25400d6207a410af2469fb9b4cc',1,'ns3::ndn::val::pft::PFT']]],
-  ['removeentriesbynoncelist',['removeEntriesByNonceList',['../classns3_1_1ndn_1_1val_1_1ifnt_1_1Ifnt.html#a76f5e54dc17b13e82ed7415b7e024221',1,'ns3::ndn::val::ifnt::Ifnt']]],
-  ['removeentry',['removeEntry',['../classns3_1_1ndn_1_1val_1_1dfnt_1_1Dfnt.html#a58aedb377a3ec7d684279e3357d8283f',1,'ns3::ndn::val::dfnt::Dfnt::removeEntry()'],['../classns3_1_1ndn_1_1val_1_1f2a_1_1F2A.html#adfe6779f178375836dddd06e01796a51',1,'ns3::ndn::val::f2a::F2A::removeEntry()'],['../classns3_1_1ndn_1_1val_1_1ifnt_1_1Ifnt.html#a58aedb377a3ec7d684279e3357d8283f',1,'ns3::ndn::val::ifnt::Ifnt::removeEntry()'],['../classns3_1_1ndn_1_1val_1_1pft_1_1PFT.html#a0c2c1e7968e2f011743d6389a094d970',1,'ns3::ndn::val::pft::PFT::removeEntry()']]],
-  ['removeentrybynonce',['removeEntryByNonce',['../classns3_1_1ndn_1_1val_1_1ifnt_1_1Ifnt.html#adb3607936ecb30439c40ed1abf869a9f',1,'ns3::ndn::val::ifnt::Ifnt']]],
-  ['removeentrybysignature',['removeEntryBySignature',['../classns3_1_1ndn_1_1val_1_1dfnt_1_1Dfnt.html#a2ca12c924a2949dbee0d1f60f1dc4ba8',1,'ns3::ndn::val::dfnt::Dfnt']]],
-  ['removefromnetworkfacelist',['removeFromNetworkFaceList',['../classns3_1_1ndn_1_1val_1_1ValForwarder.html#a0edd96483d098e8c38bce6c120fd3ad8',1,'ns3::ndn::val::ValForwarder']]],
-  ['reveicedata',['reveiceData',['../classns3_1_1ndn_1_1val_1_1ValForwarder.html#aa89f5d517fdc247c361e1050597fce1f',1,'ns3::ndn::val::ValForwarder']]],
-  ['reveiceinterest',['reveiceInterest',['../classns3_1_1ndn_1_1val_1_1ValForwarder.html#a1c0c48ed9b68785567704c7930c04b22',1,'ns3::ndn::val::ValForwarder']]]
+  ['ondroppedinterest',['onDroppedInterest',['../classnfd_1_1fw_1_1Strategy.html#ade8a0efbbffe491e32b412d28130f628',1,'nfd::fw::Strategy']]],
+  ['onelesstry',['oneLessTry',['../classns3_1_1ndn_1_1val_1_1pft_1_1Entry.html#a0cd7900a1db79ec3f2f62991e008b959',1,'ns3::ndn::val::pft::Entry']]],
+  ['onreceivedvalpacket',['onReceivedValPacket',['../classns3_1_1ndn_1_1val_1_1ValForwarder.html#ab5a95acd76dcdace5c105d8a67f4a187',1,'ns3::ndn::val::ValForwarder']]],
+  ['operator_3c_3c',['operator&lt;&lt;',['../namespacenfd_1_1face.html#a69d3a38483b9e123e6cbeb309a1f4615',1,'nfd::face::operator&lt;&lt;(std::ostream &amp;os, const FaceLogHelper&lt; Face &gt; &amp;flh)'],['../namespacenfd_1_1face.html#adaf65675d4f744cbcf4d64942ed237ca',1,'nfd::face::operator&lt;&lt;(std::ostream &amp;os, const FaceLogHelper&lt; LinkService &gt; &amp;flh)'],['../namespacenfd_1_1face.html#ab8ccb4b0bf72374d8be6d7e62628b899',1,'nfd::face::operator&lt;&lt;(std::ostream &amp;os, const FaceLogHelper&lt; T &gt; &amp;flh)']]],
+  ['operator_3d_3d',['operator==',['../namespacens3_1_1ndn_1_1val_1_1dfnt.html#a3a13093dc77b0c0c8c56e495d465af3b',1,'ns3::ndn::val::dfnt::operator==()'],['../namespacens3_1_1ndn_1_1val_1_1f2a.html#a3a13093dc77b0c0c8c56e495d465af3b',1,'ns3::ndn::val::f2a::operator==()'],['../namespacens3_1_1ndn_1_1val_1_1ifnt.html#a3a13093dc77b0c0c8c56e495d465af3b',1,'ns3::ndn::val::ifnt::operator==()'],['../namespacens3_1_1ndn_1_1val.html#ad13c766248b661d987555cbd4a83e09b',1,'ns3::ndn::val::operator==(const ValHeader &amp;lhs, const ValHeader &amp;rhs)'],['../namespacens3_1_1ndn_1_1val.html#af75ad6b48517d69063aa6b10ccd188fa',1,'ns3::ndn::val::operator==(const ValPacket &amp;lhs, const ValPacket &amp;rhs)']]],
+  ['options',['Options',['../classns3_1_1ndn_1_1val_1_1face_1_1ValLinkService_1_1Options.html#aa7d1dcafaf920ce2085f60ea7b181cec',1,'ns3::ndn::val::face::ValLinkService::Options']]]
 ];

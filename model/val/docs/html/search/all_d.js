@@ -1,15 +1,12 @@
 var searchData=
 [
-  ['reassembleroptions',['reassemblerOptions',['../classns3_1_1ndn_1_1val_1_1face_1_1ValLinkService_1_1Options.html#ab13f52590401239439c43d711d3d15f2',1,'ns3::ndn::val::face::ValLinkService::Options']]],
-  ['registeroutgoingvalpacket',['registerOutgoingValPacket',['../classns3_1_1ndn_1_1val_1_1ValForwarder.html#ad2f21e32a617f077a6be268982357095',1,'ns3::ndn::val::ValForwarder']]],
-  ['removebyfaceid',['removeByFaceId',['../classns3_1_1ndn_1_1val_1_1f2a_1_1F2A.html#a52374d23c2e4f6a438b9bdde58770860',1,'ns3::ndn::val::f2a::F2A']]],
-  ['removebygeoarea',['removeByGeoArea',['../classns3_1_1ndn_1_1val_1_1f2a_1_1F2A.html#a96879db24e09ed856519af2063b0ec52',1,'ns3::ndn::val::f2a::F2A']]],
-  ['removeentriesbymatchlist',['removeEntriesByMatchList',['../classns3_1_1ndn_1_1val_1_1pft_1_1PFT.html#a4239c25400d6207a410af2469fb9b4cc',1,'ns3::ndn::val::pft::PFT']]],
-  ['removeentriesbynoncelist',['removeEntriesByNonceList',['../classns3_1_1ndn_1_1val_1_1ifnt_1_1Ifnt.html#a76f5e54dc17b13e82ed7415b7e024221',1,'ns3::ndn::val::ifnt::Ifnt']]],
-  ['removeentry',['removeEntry',['../classns3_1_1ndn_1_1val_1_1dfnt_1_1Dfnt.html#a58aedb377a3ec7d684279e3357d8283f',1,'ns3::ndn::val::dfnt::Dfnt::removeEntry()'],['../classns3_1_1ndn_1_1val_1_1f2a_1_1F2A.html#adfe6779f178375836dddd06e01796a51',1,'ns3::ndn::val::f2a::F2A::removeEntry()'],['../classns3_1_1ndn_1_1val_1_1ifnt_1_1Ifnt.html#a58aedb377a3ec7d684279e3357d8283f',1,'ns3::ndn::val::ifnt::Ifnt::removeEntry()'],['../classns3_1_1ndn_1_1val_1_1pft_1_1PFT.html#a0c2c1e7968e2f011743d6389a094d970',1,'ns3::ndn::val::pft::PFT::removeEntry()']]],
-  ['removeentrybynonce',['removeEntryByNonce',['../classns3_1_1ndn_1_1val_1_1ifnt_1_1Ifnt.html#adb3607936ecb30439c40ed1abf869a9f',1,'ns3::ndn::val::ifnt::Ifnt']]],
-  ['removeentrybysignature',['removeEntryBySignature',['../classns3_1_1ndn_1_1val_1_1dfnt_1_1Dfnt.html#a2ca12c924a2949dbee0d1f60f1dc4ba8',1,'ns3::ndn::val::dfnt::Dfnt']]],
-  ['removefromnetworkfacelist',['removeFromNetworkFaceList',['../classns3_1_1ndn_1_1val_1_1ValForwarder.html#a0edd96483d098e8c38bce6c120fd3ad8',1,'ns3::ndn::val::ValForwarder']]],
-  ['reveicedata',['reveiceData',['../classns3_1_1ndn_1_1val_1_1ValForwarder.html#aa89f5d517fdc247c361e1050597fce1f',1,'ns3::ndn::val::ValForwarder']]],
-  ['reveiceinterest',['reveiceInterest',['../classns3_1_1ndn_1_1val_1_1ValForwarder.html#a1c0c48ed9b68785567704c7930c04b22',1,'ns3::ndn::val::ValForwarder']]]
+  ['parameters',['parameters',['../structnfd_1_1fw_1_1Strategy_1_1ParsedInstanceName.html#a593c84c1234967f338f4428fa057c1d0',1,'nfd::fw::Strategy::ParsedInstanceName']]],
+  ['parsedinstancename',['ParsedInstanceName',['../structnfd_1_1fw_1_1Strategy_1_1ParsedInstanceName.html',1,'nfd::fw::Strategy']]],
+  ['parseinstancename',['parseInstanceName',['../classnfd_1_1fw_1_1Strategy.html#a2bab82a26bffcb8d513779de2a099637',1,'nfd::fw::Strategy']]],
+  ['pft',['PFT',['../classns3_1_1ndn_1_1val_1_1pft_1_1PFT.html',1,'PFT'],['../classns3_1_1ndn_1_1val_1_1pft_1_1Entry.html#ae329ba283360d933c2abd8148c91c589',1,'ns3::ndn::val::pft::Entry::PFT()'],['../classns3_1_1ndn_1_1val_1_1pft_1_1PFT.html#a9a4ba7bbd7449929dcdab9dd9b3116d3',1,'ns3::ndn::val::pft::PFT::PFT()']]],
+  ['prefixannouncement',['PrefixAnnouncement',['../namespacendn_1_1lp_1_1tlv.html#a06fc87d81c62e9abb8790b6e5713c55ba25cb1f00b36fca711f09de77730a9b1a',1,'ndn::lp::tlv']]],
+  ['prefixannouncementfield',['PrefixAnnouncementField',['../namespacendn_1_1lp.html#a634a4b4c8af507bb1ea83f893823ee72',1,'ndn::lp']]],
+  ['preprocessingvalpacket',['preProcessingValPacket',['../classns3_1_1ndn_1_1val_1_1ValForwarder.html#a83e3784141c703d07a0a364a1688c2a2',1,'ns3::ndn::val::ValForwarder']]],
+  ['processdatafromnetwork',['processDataFromNetwork',['../classns3_1_1ndn_1_1val_1_1ValForwarder.html#aba0ab3c45c07916219aa4f746447aafc',1,'ns3::ndn::val::ValForwarder']]],
+  ['processinterestfromnetwork',['processInterestFromNetwork',['../classns3_1_1ndn_1_1val_1_1ValForwarder.html#abbdc7661da4e21cbe5079bcbec416c67',1,'ns3::ndn::val::ValForwarder']]]
 ];

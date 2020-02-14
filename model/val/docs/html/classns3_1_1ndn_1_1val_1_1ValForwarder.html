@@ -86,12 +86,13 @@ Collaboration diagram for ValForwarder:</div>
 <div class="dyncontent">
 <div class="center"><img src="classns3_1_1ndn_1_1val_1_1ValForwarder__coll__graph.png" border="0" usemap="#ValForwarder_coll__map" alt="Collaboration graph"/></div>
 <map name="ValForwarder_coll__map" id="ValForwarder_coll__map">
-<area shape="rect" id="node3" href="classns3_1_1ndn_1_1val_1_1face_1_1GeofaceFactory.html" title="This class creates the geoFaces. " alt="" coords="5,260,120,287"/>
-<area shape="rect" id="node9" href="classns3_1_1ndn_1_1val_1_1ValStrategy.html" title="Pure abstract class, is the base of any new forwarding strategy for VAL. " alt="" coords="255,260,345,287"/>
-<area shape="rect" id="node2" href="classns3_1_1ndn_1_1val_1_1f2a_1_1F2A.html" title="F2A Face&#45;to&#45;Area table. " alt="" coords="53,81,99,108"/>
-<area shape="rect" id="node4" href="classns3_1_1ndn_1_1val_1_1pft_1_1PFT.html" title="PFT &#45; Pending Forwarding Table. " alt="" coords="123,81,170,108"/>
-<area shape="rect" id="node5" href="classns3_1_1ndn_1_1val_1_1dfnt_1_1Dfnt.html" title="DFTN &#45; Data From Network Table. " alt="" coords="194,81,241,108"/>
-<area shape="rect" id="node7" href="classns3_1_1ndn_1_1val_1_1ifnt_1_1Ifnt.html" title="Ifnt &#45; Interest From Network Table, VAL support structure. " alt="" coords="303,81,345,108"/>
+<area shape="rect" id="node3" href="classns3_1_1ndn_1_1val_1_1face_1_1GeofaceFactory.html" title="This class creates the geoFaces. " alt="" coords="5,273,120,300"/>
+<area shape="rect" id="node9" href="classns3_1_1ndn_1_1val_1_1ValStrategy.html" title="Pure abstract class, is the base of any new forwarding strategy for VAL. " alt="" coords="255,273,345,300"/>
+<area shape="rect" id="node2" href="classns3_1_1ndn_1_1val_1_1f2a_1_1F2A.html" title="F2A Face&#45;to&#45;Area table. " alt="" coords="17,95,63,121"/>
+<area shape="rect" id="node4" href="classns3_1_1ndn_1_1val_1_1pft_1_1PFT.html" title="PFT &#45; Pending Forwarding Table. " alt="" coords="87,95,134,121"/>
+<area shape="rect" id="node5" href="classns3_1_1ndn_1_1val_1_1dfnt_1_1Dfnt.html" title="DFTN &#45; Data From Network Table. " alt="" coords="158,95,205,121"/>
+<area shape="rect" id="node10" href="classnfd_1_1FaceTable.html" title="container of all faces " alt="" coords="229,95,312,121"/>
+<area shape="rect" id="node7" href="classns3_1_1ndn_1_1val_1_1ifnt_1_1Ifnt.html" title="Ifnt &#45; Interest From Network Table, VAL support structure. " alt="" coords="354,95,395,121"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -102,10 +103,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a5e6c9737d4591659fc4eebbb269356c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aecaf35b327c95fe2f219b9a242bf62d0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classns3_1_1ndn_1_1val_1_1ValForwarder.html#aecaf35b327c95fe2f219b9a242bf62d0">~ValForwarder</a> ()</td></tr>
 <tr class="separator:aecaf35b327c95fe2f219b9a242bf62d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1c0c48ed9b68785567704c7930c04b22"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classns3_1_1ndn_1_1val_1_1ValForwarder.html#a1c0c48ed9b68785567704c7930c04b22">reveiceInterest</a> (const nfd::Face *inGeoface, const Interest &amp;interest)</td></tr>
+<tr class="memitem:a1c0c48ed9b68785567704c7930c04b22"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classns3_1_1ndn_1_1val_1_1ValForwarder.html#a1c0c48ed9b68785567704c7930c04b22">reveiceInterest</a> (const <a class="el" href="classnfd_1_1face_1_1Face.html">nfd::Face</a> *inGeoface, const Interest &amp;interest)</td></tr>
 <tr class="memdesc:a1c0c48ed9b68785567704c7930c04b22"><td class="mdescLeft">&#160;</td><td class="mdescRight">Method that deals with Interests received from NFD.  <a href="#a1c0c48ed9b68785567704c7930c04b22">More...</a><br /></td></tr>
 <tr class="separator:a1c0c48ed9b68785567704c7930c04b22"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa89f5d517fdc247c361e1050597fce1f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classns3_1_1ndn_1_1val_1_1ValForwarder.html#aa89f5d517fdc247c361e1050597fce1f">reveiceData</a> (const nfd::Face *inGeoface, const Data &amp;data, std::vector&lt; uint32_t &gt; *nonceList, bool isProducer)</td></tr>
+<tr class="memitem:aa89f5d517fdc247c361e1050597fce1f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classns3_1_1ndn_1_1val_1_1ValForwarder.html#aa89f5d517fdc247c361e1050597fce1f">reveiceData</a> (const <a class="el" href="classnfd_1_1face_1_1Face.html">nfd::Face</a> *inGeoface, const Data &amp;data, std::vector&lt; uint32_t &gt; *nonceList, bool isProducer)</td></tr>
 <tr class="memdesc:aa89f5d517fdc247c361e1050597fce1f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Method that deals with Data packets received from NFD.  <a href="#aa89f5d517fdc247c361e1050597fce1f">More...</a><br /></td></tr>
 <tr class="separator:aa89f5d517fdc247c361e1050597fce1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad2f21e32a617f077a6be268982357095"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classns3_1_1ndn_1_1val_1_1ValForwarder.html#ad2f21e32a617f077a6be268982357095">registerOutgoingValPacket</a> (const nfd::FaceId outFaceId, <a class="el" href="classns3_1_1ndn_1_1val_1_1ValPacket.html">ValPacket</a> &amp;valPkt, time::nanoseconds duration)</td></tr>
@@ -152,14 +153,14 @@ Private Member Functions</h2></td></tr>
 <tr class="memdesc:a7b864694ff0092c56877a2f195bb4593"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function implements the retransmission timer.  <a href="#a7b864694ff0092c56877a2f195bb4593">More...</a><br /></td></tr>
 <tr class="separator:a7b864694ff0092c56877a2f195bb4593"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a20900fe2f0cfa58994a1ed932ba69f8b"><td class="memItemLeft" align="right" valign="top">std::pair&lt; uint32_t, uint32_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classns3_1_1ndn_1_1val_1_1ValForwarder.html#a20900fe2f0cfa58994a1ed932ba69f8b">makeGeoFaceFromValHeader</a> (const <a class="el" href="classns3_1_1ndn_1_1val_1_1ValHeader.html">ValHeader</a> &amp;valH)</td></tr>
-<tr class="memdesc:a20900fe2f0cfa58994a1ed932ba69f8b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make geofaces from <a class="el" href="classns3_1_1ndn_1_1val_1_1ValHeader.html" title="ValHeader - aggregates the geographical information that travels between nodes. That information can ...">ValHeader</a>.  <a href="#a20900fe2f0cfa58994a1ed932ba69f8b">More...</a><br /></td></tr>
+<tr class="memdesc:a20900fe2f0cfa58994a1ed932ba69f8b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make geofaces from <a class="el" href="classns3_1_1ndn_1_1val_1_1ValHeader.html" title="ValHeader - aggregates the geographical information that travels between nodes. ">ValHeader</a>.  <a href="#a20900fe2f0cfa58994a1ed932ba69f8b">More...</a><br /></td></tr>
 <tr class="separator:a20900fe2f0cfa58994a1ed932ba69f8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
 <tr class="memitem:a0dc0c197ce19e5d16921cdc9c252312d"><td class="memItemLeft" align="right" valign="top">ndn::L3Protocol *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classns3_1_1ndn_1_1val_1_1ValForwarder.html#a0dc0c197ce19e5d16921cdc9c252312d">m_l3P</a></td></tr>
 <tr class="separator:a0dc0c197ce19e5d16921cdc9c252312d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8e42ab1ef1bec78640ddcf0a49d1b0b4"><td class="memItemLeft" align="right" valign="top">nfd::FaceTable *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classns3_1_1ndn_1_1val_1_1ValForwarder.html#a8e42ab1ef1bec78640ddcf0a49d1b0b4">m_faceTable</a></td></tr>
+<tr class="memitem:a8e42ab1ef1bec78640ddcf0a49d1b0b4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classnfd_1_1FaceTable.html">nfd::FaceTable</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classns3_1_1ndn_1_1val_1_1ValForwarder.html#a8e42ab1ef1bec78640ddcf0a49d1b0b4">m_faceTable</a></td></tr>
 <tr class="separator:a8e42ab1ef1bec78640ddcf0a49d1b0b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aea9f70cd1baf069e29aae4e7947a9418"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classns3_1_1ndn_1_1val_1_1ifnt_1_1Ifnt.html">ifnt::Ifnt</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classns3_1_1ndn_1_1val_1_1ValForwarder.html#aea9f70cd1baf069e29aae4e7947a9418">m_ifnt</a></td></tr>
 <tr class="separator:aea9f70cd1baf069e29aae4e7947a9418"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -203,7 +204,7 @@ Friends</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Constructor. </p>
-<p>it receives an L3Protocol instance in order to have access to nfd::FaceTable<br />
+<p>it receives an L3Protocol instance in order to have access to <a class="el" href="classnfd_1_1FaceTable.html" title="container of all faces ">nfd::FaceTable</a><br />
  and to add faces with ndn::Tracers in order to obttain metrics </p>
 
 </div>
@@ -470,7 +471,7 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Make geofaces from <a class="el" href="classns3_1_1ndn_1_1val_1_1ValHeader.html" title="ValHeader - aggregates the geographical information that travels between nodes. That information can ...">ValHeader</a>. </p>
+<p>Make geofaces from <a class="el" href="classns3_1_1ndn_1_1val_1_1ValHeader.html" title="ValHeader - aggregates the geographical information that travels between nodes. ">ValHeader</a>. </p>
 <dl class="section return"><dt>Returns</dt><dd>first FaceId_SA, second FaceID_DA </dd></dl>
 
 </div>
@@ -602,7 +603,7 @@ Friends</h2></td></tr>
 <p>this function creates the IFNT entry, the geoFaces and sends the packet to NFD </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">face</td><td>incoming face </td></tr>
-    <tr><td class="paramname">valH</td><td>the <a class="el" href="classns3_1_1ndn_1_1val_1_1ValHeader.html" title="ValHeader - aggregates the geographical information that travels between nodes. That information can ...">ValHeader</a> present in the received <a class="el" href="classns3_1_1ndn_1_1val_1_1ValPacket.html" title="ValPacket represents the packets received and sent by VAL. ">ValPacket</a> </td></tr>
+    <tr><td class="paramname">valH</td><td>the <a class="el" href="classns3_1_1ndn_1_1val_1_1ValHeader.html" title="ValHeader - aggregates the geographical information that travels between nodes. ">ValHeader</a> present in the received <a class="el" href="classns3_1_1ndn_1_1val_1_1ValPacket.html" title="ValPacket represents the packets received and sent by VAL. ">ValPacket</a> </td></tr>
     <tr><td class="paramname">data</td><td>the Data present in the received <a class="el" href="classns3_1_1ndn_1_1val_1_1ValPacket.html" title="ValPacket represents the packets received and sent by VAL. ">ValPacket</a> </td></tr>
   </table>
   </dd>
@@ -654,7 +655,7 @@ Friends</h2></td></tr>
 <p>this function creates the IFNT entry, the geoFaces and sends the packet to NFD </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">face</td><td>incoming face </td></tr>
-    <tr><td class="paramname">valH</td><td>the <a class="el" href="classns3_1_1ndn_1_1val_1_1ValHeader.html" title="ValHeader - aggregates the geographical information that travels between nodes. That information can ...">ValHeader</a> present in the received <a class="el" href="classns3_1_1ndn_1_1val_1_1ValPacket.html" title="ValPacket represents the packets received and sent by VAL. ">ValPacket</a> </td></tr>
+    <tr><td class="paramname">valH</td><td>the <a class="el" href="classns3_1_1ndn_1_1val_1_1ValHeader.html" title="ValHeader - aggregates the geographical information that travels between nodes. ">ValHeader</a> present in the received <a class="el" href="classns3_1_1ndn_1_1val_1_1ValPacket.html" title="ValPacket represents the packets received and sent by VAL. ">ValPacket</a> </td></tr>
     <tr><td class="paramname">interest</td><td>the Interest present in the received <a class="el" href="classns3_1_1ndn_1_1val_1_1ValPacket.html" title="ValPacket represents the packets received and sent by VAL. ">ValPacket</a> </td></tr>
   </table>
   </dd>
@@ -743,7 +744,7 @@ Friends</h2></td></tr>
         <tr>
           <td class="memname">void reveiceData </td>
           <td>(</td>
-          <td class="paramtype">const nfd::Face *&#160;</td>
+          <td class="paramtype">const <a class="el" href="classnfd_1_1face_1_1Face.html">nfd::Face</a> *&#160;</td>
           <td class="paramname"><em>inGeoface</em>, </td>
         </tr>
         <tr>
@@ -795,7 +796,7 @@ Friends</h2></td></tr>
         <tr>
           <td class="memname">void reveiceInterest </td>
           <td>(</td>
-          <td class="paramtype">const nfd::Face *&#160;</td>
+          <td class="paramtype">const <a class="el" href="classnfd_1_1face_1_1Face.html">nfd::Face</a> *&#160;</td>
           <td class="paramname"><em>inGeoface</em>, </td>
         </tr>
         <tr>
@@ -902,7 +903,7 @@ Friends</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">nfd::FaceTable* m_faceTable</td>
+          <td class="memname"><a class="el" href="classnfd_1_1FaceTable.html">nfd::FaceTable</a>* m_faceTable</td>
         </tr>
       </table>
   </td>

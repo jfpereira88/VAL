@@ -19,7 +19,6 @@ using namespace ::ndn::literals::time_literals;
 namespace time = ::ndn::time;
 
 /**
- * \ingroup val
  * \brief This class represents the PFT entry
  * \details Each object can have one of two states <br>
  * WAITING_FORWARDING - 0 <br>

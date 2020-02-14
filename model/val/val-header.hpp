@@ -17,8 +17,8 @@ namespace val {
 using ::ndn::Block;
 
 /**
- * \ingroup val
  * \brief ValHeader - aggregates the geographical information that travels between nodes.
+ * 
  * That information can be in TLV format or as member variables within the object.
  */
 class ValHeader

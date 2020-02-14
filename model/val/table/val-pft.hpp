@@ -18,7 +18,6 @@ using Table = std::list<std::shared_ptr<Entry>>;
 using ListMatchResult = std::vector<std::shared_ptr<Entry>>;
 
 /**
- * \ingroup val
  * \brief PFT - Pending Forwarding Table.
  * \details Registers ValPackets that are to be sent to the network.
  */

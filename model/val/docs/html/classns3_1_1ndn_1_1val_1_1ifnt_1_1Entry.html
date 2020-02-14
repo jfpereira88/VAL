@@ -128,7 +128,7 @@ Private Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>This class represents a IFNT <a class="el" href="classns3_1_1ndn_1_1val_1_1ifnt_1_1Entry.html" title="This class represents a IFNT Entry. ">Entry</a>. </p>
-<p>A IFNT <a class="el" href="classns3_1_1ndn_1_1val_1_1ifnt_1_1Entry.html" title="This class represents a IFNT Entry. ">Entry</a> contains all the fields of the <a class="el" href="classns3_1_1ndn_1_1val_1_1ValHeader.html" title="ValHeader - aggregates the geographical information that travels between nodes. That information can ...">ValHeader</a> and the nonce of Interest packet, as well as the incoming face ID </p>
+<p>A IFNT <a class="el" href="classns3_1_1ndn_1_1val_1_1ifnt_1_1Entry.html" title="This class represents a IFNT Entry. ">Entry</a> contains all the fields of the <a class="el" href="classns3_1_1ndn_1_1val_1_1ValHeader.html" title="ValHeader - aggregates the geographical information that travels between nodes. ">ValHeader</a> and the nonce of Interest packet, as well as the incoming face ID </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a543208157520515b640abe34e12843b7"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a543208157520515b640abe34e12843b7">&#9670;&nbsp;</a></span>Entry()</h2>
@@ -165,14 +165,14 @@ Private Attributes</h2></td></tr>
 <p>Constructor. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">valHeader</td><td>the <a class="el" href="classns3_1_1ndn_1_1val_1_1ValHeader.html" title="ValHeader - aggregates the geographical information that travels between nodes. That information can ...">ValHeader</a> </td></tr>
+    <tr><td class="paramname">valHeader</td><td>the <a class="el" href="classns3_1_1ndn_1_1val_1_1ValHeader.html" title="ValHeader - aggregates the geographical information that travels between nodes. ">ValHeader</a> </td></tr>
     <tr><td class="paramname">interest</td><td>the Interest packet </td></tr>
     <tr><td class="paramname">faceId</td><td>the id of the incoming face</td></tr>
   </table>
   </dd>
 </dl>
 <p>The fields of valHeader are safe within member variables, as it is the nonce of the interst.<br />
- The field hopC in <a class="el" href="classns3_1_1ndn_1_1val_1_1ValHeader.html" title="ValHeader - aggregates the geographical information that travels between nodes. That information can ...">ValHeader</a> is decremented upon creation of the IFNT <a class="el" href="classns3_1_1ndn_1_1val_1_1ifnt_1_1Entry.html" title="This class represents a IFNT Entry. ">Entry</a> instance </p>
+ The field hopC in <a class="el" href="classns3_1_1ndn_1_1val_1_1ValHeader.html" title="ValHeader - aggregates the geographical information that travels between nodes. ">ValHeader</a> is decremented upon creation of the IFNT <a class="el" href="classns3_1_1ndn_1_1val_1_1ifnt_1_1Entry.html" title="This class represents a IFNT Entry. ">Entry</a> instance </p>
 
 </div>
 </div>

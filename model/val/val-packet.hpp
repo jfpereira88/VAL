@@ -19,12 +19,11 @@ namespace ns3 {
 namespace ndn {
 /**
  * \ingroup ndn
- * \defgroup val VAL components
+ * \defgroup val Alterations to support VAL
  */
 namespace val {
 
 /**
- * \ingroup val
  * \brief ValPacket represents the packets received and sent by VAL.
  * 
  * This class contains the VAL Header and the NDN packet. <br>

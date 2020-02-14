@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['reassembleroptions',['reassemblerOptions',['../classns3_1_1ndn_1_1val_1_1face_1_1ValLinkService_1_1Options.html#ab13f52590401239439c43d711d3d15f2',1,'ns3::ndn::val::face::ValLinkService::Options']]]
+  ['ondroppedinterest',['onDroppedInterest',['../classnfd_1_1face_1_1Face.html#ad0d924a5aba75ef0ca5158f530bfdb8c',1,'nfd::face::Face::onDroppedInterest()'],['../classnfd_1_1face_1_1LinkService.html#af26a821cb1ff303bef4a0a2fa2bf200e',1,'nfd::face::LinkService::onDroppedInterest()']]]
 ];

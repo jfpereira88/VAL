@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['zero_5fwait',['ZERO_WAIT',['../classns3_1_1ndn_1_1val_1_1ValStrategy.html#a31c7e6b04f916dbec5cf18109713c47c',1,'ns3::ndn::val::ValStrategy']]]
+  ['signal_5frange',['SIGNAL_RANGE',['../classns3_1_1ndn_1_1val_1_1ValStrategy.html#a778d005ec940c0d6b94b10cadc23d84e',1,'ns3::ndn::val::ValStrategy']]],
+  ['strategyname',['strategyName',['../structnfd_1_1fw_1_1Strategy_1_1ParsedInstanceName.html#aadcf739188396339d6a4d75c9c7bb3d7',1,'nfd::fw::Strategy::ParsedInstanceName']]]
 ];

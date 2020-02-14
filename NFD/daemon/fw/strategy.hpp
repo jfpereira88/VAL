@@ -266,8 +266,10 @@ protected: // actions
 
   /**
    * ******************************************
-   * jfp 2019 uminho
-   * actions to support comunication with VAL 
+   * \ingroup val
+   * \brief actions to support comunication with VAL 
+   * 
+   * jfp mieti-uminho
    * ******************************************
    */
   void

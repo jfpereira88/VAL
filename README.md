@@ -26,9 +26,10 @@ The design provides:
 
 ```shell
  cp src/ndnSim/examples/ndn-simple-v2v.cpp scratch/ndn-simple-v2v.cc
-
+```
+```shell
  NS_LOG="ndn.val.ValForwarder:ndn.val.ValDistancesStrategy:ndn.val.face.ValLinkService:V2VSimple:ndn-cxx.nfd.Forwarder:ndn-cxx.nfd.BroadcastStrategy:ndn.Consumer:ndn.Producer" ./waf --run ndn-simple-v2v
-
+```
 ----
 
 

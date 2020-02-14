@@ -12,8 +12,8 @@ VAL implements a forwarding strategy based on distances, other forwarding strate
 
 The design provides:
  - (1) a mechanism to bind NDN data names to the producers’ and consumers' geographic areas; (geoFaces)
- - (2) an algorithm to guide Interests towards data producers using the distances between nodes and distances to the producers' areas;  ( \c ValDistancesStrategy)
- - (3) an algorithm to guide Data packets towards data consumers' using the distances between nodes; ( \c ValDistancesStrategy)
+ - (2) an algorithm to guide Interests towards data producers using the distances between nodes and distances to the producers' areas;  (`ValDistancesStrategy`)
+ - (3) an algorithm to guide Data packets towards data consumers' using the distances between nodes; (`ValDistancesStrategy`)
  - (4) a discovery mechanism to find producers' areas. (discovery phase: using a special geoFace with no associated geo-area that is the default route in every FIB, the floodFace)
  - (5) a mechanism to mitigate Broadcast Storms. (Forwarding cancellation based on timers and retransmission of packets from node in better position)
  - (6) a mechanism that mitigates intermittent communications characteristic of VANETs (implicit acknowlegment)
